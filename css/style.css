@@ -1,0 +1,117 @@
+/* Reset ringan */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f4f6f9;color:#222;line-height:1.4}
+.header{background:#2f855a;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
+.brand{font-weight:700}
+.header nav a{color:#fff;text-decoration:none;margin-left:14px}
+.container{max-width:1000px;margin:28px auto;padding:0 16px}
+.center{text-align:center;padding:48px 16px}
+.btn{display:inline-block;background:#2f855a;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;border:none;cursor:pointer}
+.btn.secondary{background:#e2e8f0;color:#1f2937}
+.btn-logout{background:#e53e3e;padding:8px 12px;border-radius:6px;color:#fff;text-decoration:none}
+
+/* auth form */
+.auth{max-width:420px;margin:28px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+.auth label{display:block;margin-top:12px;font-size:0.95rem}
+.auth input{width:100%;padding:10px;margin-top:6px;border:1px solid #e6e8eb;border-radius:8px}
+
+/* cards / stats */
+.grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:18px}
+.stat-card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06);text-align:center}
+.stat-card h3{font-size:2rem;margin-bottom:6px}
+
+/* table */
+.table{width:100%;border-collapse:collapse;margin-top:18px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+.table th,.table td{padding:12px 14px;border-bottom:1px solid #f1f2f4;text-align:left}
+.table thead th{background:#f7fafc;font-weight:700}
+
+/* card grid */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:18px}
+.card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06);cursor:pointer;transition:transform .2s}
+.card:hover{transform:translateY(-6px)}
+
+/* footer */
+.footer{text-align:center;padding:12px 0;color:#6b7280;margin-top:40px}
+
+/* Media query: responsive (contoh untuk layar <= 600px) */
+@media (max-width:600px){
+  .header{padding:12px}
+  .brand{font-size:0.95rem}
+  .auth{margin:12px;border-radius:8px}
+  .grid-stats{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+}
+/* Gaya umum */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f8f9fa;
+  color: #333;
+}
+
+/* Header */
+.header {
+  background: #00695c;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 15px;
+}
+
+.header nav a:hover {
+  text-decoration: underline;
+}
+
+/* Tombol logout */
+.btn-logout {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.btn-logout:hover {
+  background: #b71c1c;
+}
+
+/* Container utama */
+.container {
+  padding: 2rem;
+}
+
+/* Statistik cards */
+.stats {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  flex: 1;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.card h3 {
+  margin-bottom: 10px;
+  color: #00796b;
+  font-size: 20px;
+}
+
+.card p {
+  font-size: 30px;
+  font-weight: bold;
+  color: #004d40;
+}

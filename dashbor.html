@@ -1,11 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Hallo Dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard Monitoring Data Wisata Indonesia</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <h1> Hallo Dashboard</h1>
-  <p>Selamat datang, di Dashboard</p>
-  <a href="index.html">Logout</a>
+  <header class="header">
+    <div class="brand">Dashboard Monitoring Data Wisata</div>
+    <nav>
+      <a href="categories/categories.html">Categories</a>
+      <a href="transaction/transaction.html">Transactions</a>
+      <a href="index.html" class="btn-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h2>Halo, Selamat datang!</h2>
+    <p>Ringkasan singkat:</p>
+
+    <div class="grid-stats">
+      <div class="stat-card">
+        <h3 id="countCategories">0</h3>
+        <p>Categories</p>
+      </div>
+
+      <div class="stat-card">
+        <h3 id="countTransactions">0</h3>
+        <p>Transactions</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Ambil data dari localStorage
+    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+    const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+
+    // Tampilkan jumlah ke elemen dashboard
+    document.getElementById('countCategories').textContent = categories.length;
+    document.getElementById('countTransactions').textContent = transactions.length;
+  </script>
 </body>
 </html>
