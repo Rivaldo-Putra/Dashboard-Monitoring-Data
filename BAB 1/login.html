@@ -53,7 +53,9 @@
       // Jika ditemukan → login sukses
       localStorage.setItem('loggedIn', 'true');
       localStorage.setItem('currentUser', JSON.stringify(foundUser));
-      location.href = 'index.html';
+      
+      // Arahkan langsung ke dashboard
+      location.href = 'dashbor.html';
     });
   </script>
 </body>
