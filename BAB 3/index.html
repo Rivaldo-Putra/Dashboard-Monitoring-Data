@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Monitoring Data — Beranda</title>
+  <style>
+    :root{--green:#2f855a;--dark:#123;--muted:#6b7280}
+    body{font-family:Inter,system-ui,Arial; margin:0;background:#f7faf9;color:var(--dark)}
+    header{background:var(--green);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+    .brand{font-weight:700}
+    nav a{color:#fff;text-decoration:none;margin-left:12px}
+    .container{max-width:1000px;margin:28px auto;padding:16px}
+    .grid{display:flex;gap:16px;flex-wrap:wrap}
+    .card{background:#fff;padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.06);flex:1;min-width:220px}
+    .btn{background:var(--green);color:#fff;padding:10px 14px;border-radius:8px;border:none;cursor:pointer}
+    .small{font-size:.9rem;color:var(--muted)}
+    footer{padding:12px;text-align:center;color:var(--muted)}
+    #snackbar{visibility:hidden;min-width:240px;margin-left:-120px;background:#333;color:#fff;text-align:center;border-radius:8px;padding:12px;position:fixed;left:50%;bottom:30px;z-index:1000;opacity:0;transform:translateY(10px)}
+    #snackbar.show{visibility:visible;opacity:1;transform:translateY(0);transition:opacity .35s,transform .35s}
+    #snackbar.success{background:#16a34a}
+    #snackbar.error{background:#dc2626}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Dashboard Monitoring Data</div>
+    <nav>
+      <a href="index.html">Beranda</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="about.html">Tentang</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1 id="pageTitle">Selamat datang!</h1>
+    <p class="small" id="subTitle">Prototype Dashboard Monitoring Data — Dashboard Wisata</p>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="btn-group">
+        <!-- Added IDs for JavaScript functionality -->
+        <a class="btn" href="admin.html" id="btnAdmin">Masuk sebagai Admin</a>
+        <a class="btn" href="login.html" id="btnLogin">Login</a>
+        <a class="btn" href="register.html" id="btnRegister">Register</a>
+      </div>
+
+      <!-- Added card for stats to fix countCategories/countTransactions -->
+      <div class="card">
+        <h3>Statistik</h3>
+        <p class="small">Jumlah Kategori: <span id="countCategories">0</span></p>
+        <p class="small">Jumlah Transaksi: <span id="countTransactions">0</span></p>
+        <!-- Added btnOpenDashboard -->
+        <button class="btn" id="btnOpenDashboard">Buka Dashboard</button>
+      </div>
+
+      <div class="card" id="cardActions">
+        <h3>Aksi cepat</h3>
+        <p class="small">Coba klik tombol untuk melihat DOM berubah (demo).</p>
+        <button class="btn" id="btnAddDemoCat">Tambah kategori demo</button>
+        <button class="btn" id="btnAddDemoTrx">Tambah transaksi demo</button>
+        <div style="margin-top:12px">
+          <label class="small">Tanggal sekarang:</label>
+          <div id="today" class="small"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Informasi terakhir</h3>
+        <p class="small">Aksi terakhir: <span id="lastAction">-</span></p>
+        <div style="margin-top:8px">
+          <button class="btn" id="btnShowToast">Tampilkan Toast</button>
+          <button class="btn" id="btnShowErrorToast" style="background:#ef4444;margin-left:8px">Tampilkan Error</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="snackbar"></div>
+
+  <footer>© 2025 Dashboard Monitoring Data — Wisata Indonesia</footer>
+
+  <script>
+  // Helper: Show toast notification
+  function showToast(message, type = 'default', duration = 3000) {
+    const s = document.getElementById('snackbar');
+    if (!s) {
+      console.error('Snackbar element not found');
+      return;
+    }
+    s.textContent = message;
+    s.className = 'show';
+    if (type === 'success') s.classList.add('success'); else s.classList.remove('success');
+    if (type === 'error') s.classList.add('error'); else s.classList.remove('error');
+    setTimeout(() => {
+      s.className = s.className.replace('show', '').trim();
+      s.classList.remove('success', 'error');
+    }, duration);
+  }
+
+  // DOM references with error handling
+  const elements = {
+    countCategoriesEl: document.getElementById('countCategories'),
+    countTransactionsEl: document.getElementById('countTransactions'),
+    lastActionEl: document.getElementById('lastAction'),
+    todayEl: document.getElementById('today'),
+    cardActions: document.querySelector('#cardActions'),
+    btnOpenDashboard: document.getElementById('btnOpenDashboard'),
+    btnAddDemoCat: document.getElementById('btnAddDemoCat'),
+    btnAddDemoTrx: document.getElementById('btnAddDemoTrx'),
+    btnShowToast: document.getElementById('btnShowToast'),
+    btnShowErrorToast: document.getElementById('btnShowErrorToast'),
+    btnAdmin: document.getElementById('btnAdmin'),
+    btnLogin: document.getElementById('btnLogin'),
+    btnRegister: document.getElementById('btnRegister')
+  };
+
+  // Check for missing elements
+  Object.entries(elements).forEach(([key, el]) => {
+    if (!el) console.warn(`Element ${key} not found`);
+  });
+
+  // Util: LocalStorage access with error handling
+  function getCategories() {
+    try {
+      return JSON.parse(localStorage.getItem('categories') || '[]');
+    } catch (e) {
+      showToast('Error membaca kategori', 'error');
+      return [];
+    }
+  }
+
+  function getTransactions() {
+    try {
+      return JSON.parse(localStorage.getItem('transactions') || '[]');
+    } catch (e) {
+      showToast('Error membaca transaksi', 'error');
+      return [];
+    }
+  }
+
+  // Update stats display
+  function refreshStats() {
+    const cats = getCategories();
+    const trxs = getTransactions();
+    if (elements.countCategoriesEl) elements.countCategoriesEl.textContent = cats.length;
+    if (elements.countTransactionsEl) elements.countTransactionsEl.textContent = trxs.length;
+  }
+
+  // Set current date
+  function setToday() {
+    if (elements.todayEl) {
+      elements.todayEl.textContent = new Date().toLocaleString();
+    }
+  }
+
+  // Mock user state for authentication simulation
+  function getUserState() {
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+  function setUserState(user) {
+    try {
+      localStorage.setItem('user', JSON.stringify(user));
+    } catch (e) {
+      showToast('Error menyimpan user state', 'error');
+    }
+  }
+
+  // Event: Buka Dashboard
+  if (elements.btnOpenDashboard) {
+    elements.btnOpenDashboard.addEventListener('click', () => {
+      const info = document.createElement('div');
+      info.textContent = 'Membuka dashboard pada ' + new Date().toLocaleTimeString();
+      info.style.marginTop = '10px';
+      if (elements.cardActions) elements.cardActions.appendChild(info);
+      const lastAction = 'User membuka dashboard pada ' + new Date().toLocaleString();
+      localStorage.setItem('lastAction', lastAction);
+      if (elements.lastActionEl) elements.lastActionEl.textContent = lastAction;
+      showToast('Membuka dashboard...', 'success', 2000);
+      setTimeout(() => {
+        try {
+          window.location.href = 'dashboard.html';
+        } catch (e) {
+          showToast('Error navigasi ke dashboard', 'error');
+        }
+      }, 1000);
+    });
+  }
+
+  // Event: Masuk sebagai Admin
+  if (elements.btnAdmin) {
+    elements.btnAdmin.addEventListener('click', (e) => {
+      e.preventDefault();
+      const user = getUserState();
+      if (user.isAdmin) {
+        showToast('Berhasil masuk sebagai Admin', 'success', 2000);
+        setTimeout(() => { window.location.href = 'admin.html'; }, 1000);
+      } else {
+        showToast('Akses ditolak: Bukan admin', 'error', 3000);
+      }
+    });
+  }
+
+  // Event: Login
+  if (elements.btnLogin) {
+    elements.btnLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      setUserState({ isLoggedIn: true, isAdmin: false });
+      showToast('Login berhasil', 'success', 2000);
+      setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+    });
+  }
+
+  // Event: Register
+  if (elements.btnRegister) {
+    elements.btnRegister.addEventListener('click', (e) => {
+      e.preventDefault();
+      setUserState({ isLoggedIn: false, isAdmin: false });
+      showToast('Registrasi berhasil, silakan login', 'success', 2000);
+      setTimeout(() => { window.location.href = 'register.html'; }, 1000);
+    });
+  }
+
+  // Event: Tambah kategori
+  if (elements.btnAddDemoCat) {
+    elements.btnAddDemoCat.addEventListener('click', () => {
+      const name = 'Kategori Demo ' + Math.floor(Math.random() * 900 + 100);
+      const cats = getCategories();
+      cats.push({ id: Date.now(), name, createdAt: new Date().toLocaleString() });
+      try {
+        localStorage.setItem('categories', JSON.stringify(cats));
+        const lastAction = 'Menambah kategori: ' + name;
+        localStorage.setItem('lastAction', lastAction);
+        if (elements.lastActionEl) elements.lastActionEl.textContent = lastAction;
+        refreshStats();
+        showToast('Kategori "' + name + '" ditambahkan', 'success', 2500);
+        localStorage.setItem('categories_update_time', Date.now());
+      } catch (e) {
+        showToast('Error menambah kategori', 'error');
+      }
+    });
+  }
+
+  // Event: Tambah transaksi
+  if (elements.btnAddDemoTrx) {
+    elements.btnAddDemoTrx.addEventListener('click', () => {
+      const name = 'Transaksi Demo ' + Math.floor(Math.random() * 900 + 100);
+      const trxs = getTransactions();
+      trxs.push({
+        id: Date.now(),
+        name,
+        jumlah: Math.floor(Math.random() * 200000) + 50000,
+        metode: ['Tunai', 'Transfer'][Math.floor(Math.random() * 2)],
+        status: ['Belum Dibayar', 'Sudah Dibayar'][Math.floor(Math.random() * 2)],
+        createdAt: new Date().toLocaleString()
+      });
+      try {
+        localStorage.setItem('transactions', JSON.stringify(trxs));
+        const lastAction = 'Menambah transaksi: ' + name;
+        localStorage.setItem('lastAction', lastAction);
+        if (elements.lastActionEl) elements.lastActionEl.textContent = lastAction;
+        refreshStats();
+        showToast('Transaksi "' + name + '" ditambahkan', 'success', 2500);
+        localStorage.setItem('transactions_update_time', Date.now());
+      } catch (e) {
+        showToast('Error menambah transaksi', 'error');
+      }
+    });
+  }
+
+  // Event: Tampilkan Toast
+  if (elements.btnShowToast) {
+    elements.btnShowToast.addEventListener('click', () => {
+      showToast('Ini notifikasi sukses contoh!', 'success');
+    });
+  }
+
+  // Event: Tampilkan Error
+  if (elements.btnShowErrorToast) {
+    elements.btnShowErrorToast.addEventListener('click', () => {
+      showToast('Terjadi kesalahan (contoh)', 'error');
+    });
+  }
+
+  // Sync: Handle storage changes from other tabs
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'categories' || e.key === 'transactions' || e.key === 'categories_update_time' || e.key === 'transactions_update_time' || e.key === 'lastAction') {
+      refreshStats();
+      const la = localStorage.getItem('lastAction');
+      if (la && elements.lastActionEl) elements.lastActionEl.textContent = la;
+    }
+  });
+
+  // Initialize page
+  (function init() {
+    refreshStats();
+    setToday();
+    const la = localStorage.getItem('lastAction');
+    if (la && elements.lastActionEl) elements.lastActionEl.textContent = la; else if (elements.lastActionEl) elements.lastActionEl.textContent = '-';
+    document.querySelectorAll('nav a').forEach(a => a.dataset.initial = a.href);
+    // Initialize mock user state for testing
+    if (!localStorage.getItem('user')) {
+      setUserState({ isLoggedIn: false, isAdmin: false });
+    }
+  })();
+  </script>
+</body>
+</html>

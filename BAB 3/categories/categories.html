@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories - Dashboard Monitoring Data Wisata</title>
+  <!-- ❌ Hapus link yang salah -->
+  <!-- <link rel="stylesheet" href="../categories/categories.html"> -->
+  <!-- ✅ Link CSS yang benar -->
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Dashboard Monitoring Data Wisata</h1>
+    <nav>
+      <a href="../dashbor.html">Dashboard</a>
+      <a href="categories.html">Categories</a>
+      <a href="categories-entry.html">Tambah Category</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h2>Daftar Categories</h2>
+    <table class="table" id="catTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Category</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data dari localStorage akan ditampilkan di sini -->
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    // Ambil dan tampilkan daftar kategori dari localStorage
+    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+    const tbody = document.querySelector('#catTable tbody');
+
+    if (categories.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;">Belum ada data</td></tr>`;
+    } else {
+      categories.forEach((cat, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${cat.name}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>

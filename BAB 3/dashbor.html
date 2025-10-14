@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard Monitoring Data Wisata Indonesia</title>
+  <style>
+    body {font-family: Arial; background: #f4f6f9; margin: 0;}
+    header {background: #2f855a; color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;}
+    .brand {font-weight: bold;}
+    nav a {color: #fff; text-decoration: none; margin-left: 15px;}
+    .container {padding: 20px;}
+    .grid-stats {display: flex; gap: 20px; margin-bottom: 20px;}
+    .stat-card {background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: center; flex: 1;}
+    form {margin-top: 20px;}
+    input, button, select {padding: 8px; margin: 5px;}
+    table {width: 100%; border-collapse: collapse; margin-top: 15px;}
+    th, td {border: 1px solid #ccc; padding: 8px; text-align: left;}
+    th {background: #e2e8f0;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Dashboard Monitoring Data Wisata</div>
+    <nav>
+      <a href="index.html" class="btn-logout">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h2>Halo, Selamat Datang!</h2>
+    <p>Tambah kategori dan transaksi. Data akan otomatis tersimpan dan dapat dilihat oleh admin.</p>
+
+    <div class="grid-stats">
+      <div class="stat-card">
+        <h3 id="countCategories">0</h3>
+        <p>Categories</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="countTransactions">0</h3>
+        <p>Transactions</p>
+      </div>
+    </div>
+
+    <!-- Form Kategori -->
+    <form id="formCategory">
+      <h3>Tambah Kategori</h3>
+      <input type="text" id="categoryName" placeholder="Nama kategori" required>
+      <button type="submit">Tambah</button>
+    </form>
+
+    <table id="tableCategories">
+      <thead>
+        <tr>
+          <th>Nama Kategori</th>
+          <th>Tanggal Dibuat</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- Form Transaksi -->
+    <form id="formTransaction">
+      <h3>Tambah Transaksi</h3>
+      <input type="text" id="transactionName" placeholder="Nama transaksi" required>
+      <select id="transactionStatus">
+        <option value="Belum Dibayar">Belum Dibayar</option>
+        <option value="Sudah Dibayar">Sudah Dibayar</option>
+      </select>
+      <button type="submit">Tambah</button>
+    </form>
+
+    <table id="tableTransactions">
+      <thead>
+        <tr>
+          <th>Nama Transaksi</th>
+          <th>Status Pembayaran</th>
+          <th>Tanggal Dibuat</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <script>
+    // Ambil data dari localStorage
+    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+    const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+
+    const updateDashboard = () => {
+      document.getElementById('countCategories').textContent = categories.length;
+      document.getElementById('countTransactions').textContent = transactions.length;
+
+      // Simpan ke localStorage
+      localStorage.setItem('categories', JSON.stringify(categories));
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+
+      // Sinkronisasi ke admin
+      localStorage.setItem('admin_categories', JSON.stringify(categories));
+      localStorage.setItem('admin_transactions', JSON.stringify(transactions));
+
+      renderTables();
+    };
+
+    const renderTables = () => {
+      const catBody = document.querySelector('#tableCategories tbody');
+      const transBody = document.querySelector('#tableTransactions tbody');
+
+      catBody.innerHTML = categories.map(c =>
+        `<tr><td>${c.name}</td><td>${c.createdAt}</td></tr>`
+      ).join('');
+
+      transBody.innerHTML = transactions.map(t =>
+        `<tr><td>${t.name}</td><td>${t.status}</td><td>${t.createdAt}</td></tr>`
+      ).join('');
+    };
+
+    // Tambah kategori
+    document.getElementById('formCategory').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('categoryName').value.trim();
+      if (name) {
+        categories.push({ name, createdAt: new Date().toLocaleString() });
+        updateDashboard();
+        e.target.reset();
+      }
+    });
+
+    // Tambah transaksi
+    document.getElementById('formTransaction').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('transactionName').value.trim();
+      const status = document.getElementById('transactionStatus').value;
+      if (name) {
+        transactions.push({ name, status, createdAt: new Date().toLocaleString() });
+        updateDashboard();
+        e.target.reset();
+      }
+    });
+
+    updateDashboard();
+  </script>
+</body>
+</html>
