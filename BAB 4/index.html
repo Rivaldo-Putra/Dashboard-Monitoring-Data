@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Monitoring Data</title>
+<style>
+body {font-family:Arial; margin:0; background:#f4f6f9;}
+header {background:#2f855a;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}
+.brand {font-weight:700;}
+nav a {color:#fff; text-decoration:none; margin-left:12px;}
+.container {padding:20px; max-width:900px; margin:auto;}
+.card {background:#fff;padding:16px;margin-bottom:16px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+.btn {background:#2f855a;color:#fff;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;margin:4px 0;}
+.btn-red{background:#ef4444;}
+.small{color:#555;font-size:.9rem;}
+#snackbar{visibility:hidden;min-width:240px;margin-left:-120px;background:#333;color:#fff;text-align:center;border-radius:8px;padding:12px;position:fixed;left:50%;bottom:30px;z-index:1000;opacity:0;transform:translateY(10px);}
+#snackbar.show{visibility:visible;opacity:1;transform:translateY(0);transition:opacity .35s,transform .35s;}
+#snackbar.success{background:#16a34a;}
+#snackbar.error{background:#dc2626;}
+.popup-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000;}
+.popup-box{background:#fff;padding:20px;border-radius:10px;min-width:300px;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+.popup-box button{margin-top:12px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Dashboard Monitoring Data</div>
+  <nav>
+    <a href="admin.html">Login Admin</a>
+    <a href="login.html">Dashboard</a>
+    <a href="register.html">Register</a>
+  </nav>
+</header>
+
+<main class="container">
+  <h2>Selamat Datang!</h2>
+
+  <div class="card">
+    <h3>Aksi Cepat</h3>
+    <button class="btn" id="popup1Btn">Popup 1</button>
+    <button class="btn" id="popup2Btn">Popup 2</button>
+    <button class="btn" id="addCatBtn">Tambah Kategori Demo</button>
+    <button class="btn" id="addTrxBtn">Tambah Transaksi Demo</button>
+  </div>
+
+  <div class="card">
+    <h3>Notifikasi</h3>
+    <button class="btn" id="toastSuccessBtn">Toast Sukses</button>
+    <button class="btn btn-red" id="toastErrorBtn">Toast Error</button>
+  </div>
+
+  <div class="card">
+    <h3>Statistik</h3>
+    <p class="small">Jumlah Kategori: <span id="countCategories">0</span></p>
+    <p class="small">Jumlah Transaksi: <span id="countTransactions">0</span></p>
+  </div>
+
+  <div class="card">
+    <h3>Quote Inspiratif</h3>
+    <button class="btn" id="btnShowQuote">Tampilkan Quote</button>
+  </div>
+</main>
+
+<!-- Popup Overlay -->
+<div id="popupOverlay" class="popup-overlay">
+  <div class="popup-box" id="popupBox">
+    <h3 id="popupTitle">Judul Popup</h3>
+    <div id="popupContent"></div>
+    <button class="btn" id="closePopupBtn">Tutup</button>
+  </div>
+</div>
+
+<div id="snackbar"></div>
+
+<script>
+// Data lokal
+let categories = JSON.parse(localStorage.getItem('categories')||'[]');
+let transactions = JSON.parse(localStorage.getItem('transactions')||'[]');
+const quotes = [
+  "Kesuksesan adalah hasil dari persiapan, kerja keras, dan belajar dari kegagalan.",
+  "Jangan menunggu waktu yang tepat, mulailah sekarang.",
+  "Kegagalan hanyalah kesempatan untuk memulai lagi dengan lebih cerdas.",
+  "Belajar dari masa lalu, hidup di masa kini, dan rencanakan masa depan.",
+  "Tindakan kecil yang konsisten lebih baik daripada niat besar tanpa tindakan."
+];
+
+// Update statistik
+function updateStats(){
+  document.getElementById('countCategories').textContent = categories.length;
+  document.getElementById('countTransactions').textContent = transactions.length;
+  localStorage.setItem('categories',JSON.stringify(categories));
+  localStorage.setItem('transactions',JSON.stringify(transactions));
+}
+
+// Toast
+function showToast(msg,type='default',dur=3000){
+  const s = document.getElementById('snackbar');
+  s.textContent = msg;
+  s.className='show';
+  if(type==='success'){s.classList.add('success'); s.classList.remove('error');}
+  else if(type==='error'){s.classList.add('error'); s.classList.remove('success');}
+  else{s.classList.remove('success','error');}
+  setTimeout(()=>{s.className=''; s.classList.remove('success','error');},dur);
+}
+
+// Popup
+const popupOverlay = document.getElementById('popupOverlay');
+const popupTitle = document.getElementById('popupTitle');
+const popupContent = document.getElementById('popupContent');
+const closePopupBtn = document.getElementById('closePopupBtn');
+closePopupBtn.addEventListener('click',()=>popupOverlay.style.display='none');
+
+// Popup 1 → Kategori
+document.getElementById('popup1Btn').addEventListener('click',()=>{
+  popupTitle.textContent='Tambah Kategori';
+  popupContent.innerHTML=`<input type="text" id="popupCatName" placeholder="Nama kategori" style="width:90%;padding:6px;margin-bottom:6px;">
+  <button class="btn" id="submitPopupCat">Tambah</button>`;
+  popupOverlay.style.display='flex';
+  document.getElementById('submitPopupCat').addEventListener('click',()=>{
+    const name=document.getElementById('popupCatName').value.trim();
+    if(name){categories.push({name,createdAt:new Date().toLocaleString()});
+      updateStats(); showToast('Kategori "'+name+'" ditambahkan','success',2500); popupOverlay.style.display='none';}
+  });
+});
+
+// Popup 2 → Transaksi
+document.getElementById('popup2Btn').addEventListener('click',()=>{
+  popupTitle.textContent='Tambah Transaksi';
+  popupContent.innerHTML=`<input type="text" id="popupTrxName" placeholder="Nama transaksi" style="width:90%;padding:6px;margin-bottom:6px;">
+  <select id="popupTrxStatus" style="width:95%;padding:6px;margin-bottom:6px;">
+    <option value="Belum Dibayar">Belum Dibayar</option>
+    <option value="Sudah Dibayar">Sudah Dibayar</option>
+  </select>
+  <button class="btn" id="submitPopupTrx">Tambah</button>`;
+  popupOverlay.style.display='flex';
+  document.getElementById('submitPopupTrx').addEventListener('click',()=>{
+    const name=document.getElementById('popupTrxName').value.trim();
+    const status=document.getElementById('popupTrxStatus').value;
+    if(name){transactions.push({name,status,createdAt:new Date().toLocaleString()});
+      updateStats(); showToast('Transaksi "'+name+'" ditambahkan','success',2500); popupOverlay.style.display='none';}
+  });
+});
+
+// Tambah demo langsung
+document.getElementById('addCatBtn').addEventListener('click',()=>{
+  const name='Kategori Demo '+Math.floor(Math.random()*900+100);
+  categories.push({name,createdAt:new Date().toLocaleString()});
+  updateStats(); showToast('Kategori "'+name+'" ditambahkan','success',2500);
+});
+document.getElementById('addTrxBtn').addEventListener('click',()=>{
+  const name='Transaksi Demo '+Math.floor(Math.random()*900+100);
+  transactions.push({name,status:'Belum Dibayar',createdAt:new Date().toLocaleString()});
+  updateStats(); showToast('Transaksi "'+name+'" ditambahkan','success',2500);
+});
+
+// Toast buttons
+document.getElementById('toastSuccessBtn').addEventListener('click',()=>showToast('Notifikasi sukses!','success'));
+document.getElementById('toastErrorBtn').addEventListener('click',()=>showToast('Terjadi kesalahan!','error'));
+
+// Tombol Quote
+document.getElementById('btnShowQuote').addEventListener('click',()=>{
+  const q = quotes[Math.floor(Math.random()*quotes.length)];
+  popupTitle.textContent='Quote Inspiratif';
+  popupContent.innerHTML=`<p>"${q}"</p>`;
+  popupOverlay.style.display='flex';
+});
+
+updateStats();
+</script>
+</body>
+</html>

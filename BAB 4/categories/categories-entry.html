@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tambah Category - Dashboard Monitoring Data Wisata</title>
+  <!-- Hanya satu link CSS yang benar -->
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Dashboard Monitoring Data Wisata</h1>
+    <nav>
+      <a href="../dashbor.html">Dashboard</a>
+      <a href="categories.html">Categories</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h2>Tambah Category Baru</h2>
+    <form id="catForm">
+      <label for="catName">Nama Category:</label><br>
+      <input type="text" id="catName" name="catName" placeholder="contoh: Pantai" required><br><br>
+      <button type="submit" class="btn">Simpan</button>
+      <button type="reset" class="btn secondary">Batal</button>
+    </form>
+  </main>
+
+  <script>
+    // Simpan data category sederhana di localStorage
+    document.getElementById('catForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('catName').value.trim();
+      if(!name) return;
+
+      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      categories.push({ name });
+      localStorage.setItem('categories', JSON.stringify(categories));
+
+      alert('Category berhasil disimpan!');
+      document.getElementById('catForm').reset();
+    });
+  </script>
+</body>
+</html>
