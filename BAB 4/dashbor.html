@@ -1,191 +1,178 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard Admin - Monitoring Wisata</title>
-<style>
-body {font-family: Arial,sans-serif;margin:0;background:#f4f6f9;}
-header {background:#2f855a;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}
-header .brand {font-weight:bold;font-size:1.2rem;}
-nav a {color:#fff;text-decoration:none;margin-left:12px;}
-.container {max-width:1100px;margin:20px auto;padding:16px;}
-h2,h3{margin:8px 0;}
-.grid-stats, .grid-forms {display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;}
-.stat-card, .card {flex:1; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
-form {margin-top:0;}
-form input, form select, form button {padding:8px;margin:5px 0;width:100%;box-sizing:border-box;}
-form button {background:#2f855a;color:#fff;border:none;border-radius:6px;cursor:pointer;}
-table {width:100%; border-collapse: collapse; margin-top:15px; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
-th, td {border-bottom:1px solid #ddd;padding:10px;text-align:left;}
-th {background:#e2e8f0;}
-tfoot td {font-weight:bold;}
-.btn-demo {background:#16a34a;color:#fff;border:none;border-radius:6px;padding:8px;margin:5px;cursor:pointer;}
-.btn-error {background:#dc2626;color:#fff;}
-</style>
+  <meta charset="UTF-8">
+  <title>Dashboard Pertanian</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f3e6;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+    section {
+      margin: 20px auto;
+      width: 80%;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px #aaa;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #43a047;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background-color: #2e7d32; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #66bb6a;
+      color: white;
+    }
+    td, th {
+      padding: 10px;
+      text-align: center;
+    }
+    .count-box {
+      background: #a5d6a7;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-
-<header>
-  <div class="brand">Dashboard Monitoring Data Wisata</div>
-  <nav>
-    <a href="#" class="btn-logout" onclick="logout()">Logout</a>
-  </nav>
-</header>
-
-<main class="container">
-  <h2>Halo, Selamat Datang!</h2>
-  <p>Tambah kategori dan transaksi. Data akan otomatis tersimpan dan dapat dilihat oleh admin.</p>
-
-  <div class="grid-stats">
-    <div class="stat-card">
-      <h3 id="countCategories">0</h3>
-      <p>Categories</p>
+  <header>
+    <h1>Dashboard Pertanian</h1>
+    <nav>
+      <a href="index.html">Kembali</a>
+    </nav>
+  </header>
+  <section>
+    <div class="count-box">
+      <p>Total Kategori: <span id="totalCategories">0</span></p>
+      <p>Total Transaksi: <span id="totalTransactions">0</span></p>
     </div>
-    <div class="stat-card">
-      <h3 id="countTransactions">0</h3>
-      <p>Transactions</p>
-    </div>
-  </div>
 
-  <div class="grid-forms">
-    <div class="card">
-      <h3>Tambah Kategori</h3>
-      <form id="formCategory" onsubmit="tambahKategori(event)">
-        <input type="text" id="categoryName" placeholder="Nama kategori" required>
-        <button type="submit">Tambah</button>
-      </form>
-    </div>
-    <div class="card">
-      <h3>Tambah Transaksi</h3>
-      <form id="formTransaction" onsubmit="tambahTransaksi(event)">
-        <input type="text" id="transactionName" placeholder="Nama transaksi" required>
-        <select id="transactionStatus">
-          <option value="Belum Dibayar">Belum Dibayar</option>
-          <option value="Sudah Dibayar">Sudah Dibayar</option>
-        </select>
-        <button type="submit">Tambah</button>
-      </form>
-    </div>
-  </div>
+    <h2>Tambah Kategori</h2>
+    <input type="text" id="categoryName" placeholder="Nama Kategori">
+    <button onclick="addCategory()">Tambah Kategori</button>
 
-  <table id="tableCategories">
-    <thead>
-      <tr><th>Nama Kategori</th><th>Tanggal Dibuat</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <h2>Tambah Transaksi</h2>
+    <input type="text" id="transactionName" placeholder="Nama Transaksi">
+    <select id="paymentStatus">
+      <option value="Belum Dibayar">Belum Dibayar</option>
+      <option value="Sudah Dibayar">Sudah Dibayar</option>
+      <option value="Proses">Proses</option>
+    </select>
+    <button onclick="addTransaction()">Tambah Transaksi</button>
 
-  <table id="tableTransactions">
-    <thead>
-      <tr><th>Nama Transaksi</th><th>Status Pembayaran</th><th>Tanggal Dibuat</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <h2>Data Kategori</h2>
+    <table id="categoryTable">
+      <tr>
+        <th>Nama Kategori</th>
+        <th>Tanggal Dibuat</th>
+        <th>Aksi</th>
+      </tr>
+    </table>
 
-  <div class="card" style="margin-top:20px;">
-    <h3>Aksi Demo</h3>
-    <button class="btn-demo" onclick="showPopupDemo()">Popup Demo</button>
-    <button class="btn-demo" onclick="fetchDemo()">Fetch Demo Data</button>
-  </div>
-</main>
+    <h2>Data Transaksi</h2>
+    <table id="transactionTable">
+      <tr>
+        <th>Nama Transaksi</th>
+        <th>Status Pembayaran</th>
+        <th>Tanggal Dibuat</th>
+        <th>Aksi</th>
+      </tr>
+    </table>
+  <script>
+    function loadData() {
+      let categories = JSON.parse(localStorage.getItem('categories')) || [];
+      let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+      document.getElementById("totalCategories").textContent = categories.length;
+      document.getElementById("totalTransactions").textContent = transactions.length;
 
-<!-- Popup -->
-<div id="popupOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);justify-content:center;align-items:center;z-index:1000;">
-  <div style="background:#fff;padding:20px;border-radius:8px;min-width:300px;max-width:90%;text-align:center;">
-    <p id="popupText"></p>
-    <button onclick="closePopup()" class="btn-demo">Tutup</button>
-  </div>
-</div>
+      const categoryTable = document.getElementById("categoryTable");
+      categoryTable.innerHTML = `
+        <tr><th>Nama Kategori</th><th>Tanggal Dibuat</th><th>Aksi</th></tr>`;
+      categories.forEach((cat, i) => {
+        const row = categoryTable.insertRow();
+        row.innerHTML = `
+          <td>${cat.name}</td>
+          <td>${cat.date}</td>
+          <td><button onclick="deleteCategory(${i})">Hapus</button></td>`;
+      });
 
-<script>
-if(localStorage.getItem('loggedIn')!=='true'){
-  alert('Silakan login terlebih dahulu!');
-  location.href='login.html';
-}
+      const transactionTable = document.getElementById("transactionTable");
+      transactionTable.innerHTML = `
+        <tr><th>Nama Transaksi</th><th>Status Pembayaran</th><th>Tanggal Dibuat</th><th>Aksi</th></tr>`;
+      transactions.forEach((tr, i) => {
+        const row = transactionTable.insertRow();
+        row.innerHTML = `
+          <td>${tr.name}</td>
+          <td>${tr.status}</td>
+          <td>${tr.date}</td>
+          <td><button onclick="deleteTransaction(${i})">Hapus</button></td>`;
+      });
+    }
 
-let categories = JSON.parse(localStorage.getItem('categories')||'[]');
-let transactions = JSON.parse(localStorage.getItem('transactions')||'[]');
+    function addCategory() {
+      const name = document.getElementById("categoryName").value;
+      if (!name) return alert("Masukkan nama kategori!");
+      let categories = JSON.parse(localStorage.getItem('categories')) || [];
+      categories.push({ name, date: new Date().toLocaleString() });
+      localStorage.setItem('categories', JSON.stringify(categories));
+      document.getElementById("categoryName").value = "";
+      loadData();
+    }
 
-function updateDashboard(){
-  document.getElementById('countCategories').textContent = categories.length;
-  document.getElementById('countTransactions').textContent = transactions.length;
-  localStorage.setItem('categories', JSON.stringify(categories));
-  localStorage.setItem('transactions', JSON.stringify(transactions));
+    function addTransaction() {
+      const name = document.getElementById("transactionName").value;
+      const status = document.getElementById("paymentStatus").value;
+      if (!name) return alert("Masukkan nama transaksi!");
+      let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+      transactions.push({ name, status, date: new Date().toLocaleString() });
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+      document.getElementById("transactionName").value = "";
+      loadData();
+    }
 
-  document.querySelector('#tableCategories tbody').innerHTML =
-    categories.map(c=>`<tr><td>${c.name}</td><td>${c.createdAt}</td></tr>`).join('');
+    function deleteCategory(index) {
+      let categories = JSON.parse(localStorage.getItem('categories')) || [];
+      categories.splice(index, 1);
+      localStorage.setItem('categories', JSON.stringify(categories));
+      loadData();
+    }
 
-  document.querySelector('#tableTransactions tbody').innerHTML =
-    transactions.map(t=>`<tr><td>${t.name}</td><td>${t.status}</td><td>${t.createdAt}</td></tr>`).join('');
-}
+    function deleteTransaction(index) {
+      let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+      transactions.splice(index, 1);
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+      loadData();
+    }
 
-function tambahKategori(e){
-  e.preventDefault();
-  const name=document.getElementById('categoryName').value.trim();
-  if(name){
-    categories.push({name, createdAt:new Date().toLocaleString()});
-    updateDashboard();
-    document.getElementById('formCategory').reset();
-    showToast('Kategori berhasil ditambah!');
-  }
-}
-
-function tambahTransaksi(e){
-  e.preventDefault();
-  const name=document.getElementById('transactionName').value.trim();
-  const status=document.getElementById('transactionStatus').value;
-  if(name){
-    transactions.push({name,status,createdAt:new Date().toLocaleString()});
-    updateDashboard();
-    document.getElementById('formTransaction').reset();
-    showToast('Transaksi berhasil ditambah!');
-  }
-}
-
-function logout(){
-  localStorage.removeItem('loggedIn');
-  localStorage.removeItem('currentUser');
-  showToast('Logout berhasil!');
-  setTimeout(()=>location.href='index.html',600);
-}
-
-function showPopupDemo(){
-  document.getElementById('popupText').textContent='Ini popup demo!';
-  document.getElementById('popupOverlay').style.display='flex';
-}
-
-function closePopup(){
-  document.getElementById('popupOverlay').style.display='none';
-}
-
-async function fetchDemo(){
-  showToast('Mengambil data demo...');
-  try{
-    const res=await fetch('https://jsonplaceholder.typicode.com/todos/1');
-    const data=await res.json();
-    document.getElementById('popupText').textContent=`Fetch berhasil!\nTitle: ${data.title}`;
-    document.getElementById('popupOverlay').style.display='flex';
-  }catch(e){showToast('Fetch gagal!','error');}
-}
-
-function showToast(msg,type='success',dur=2500){
-  const s=document.createElement('div');
-  s.textContent=msg;
-  s.style.position='fixed';
-  s.style.left='50%';
-  s.style.bottom='30px';
-  s.style.transform='translateX(-50%)';
-  s.style.padding='12px 20px';
-  s.style.color='#fff';
-  s.style.borderRadius='8px';
-  s.style.zIndex=1000;
-  s.style.background=type==='error'?'#dc2626':'#16a34a';
-  document.body.appendChild(s);
-  setTimeout(()=>document.body.removeChild(s),dur);
-}
-
-updateDashboard();
-</script>
+    loadData();
+  </script>
 </body>
 </html>

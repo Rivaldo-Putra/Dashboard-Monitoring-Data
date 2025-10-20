@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="id">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Admin Panel - Dashboard Wisata</title>
+  <title>Admin Panel - Pertanian</title>
   <style>
     body {font-family: 'Segoe UI', sans-serif; background: #f4f6f9; margin: 0;}
     header {
@@ -35,44 +35,59 @@
     .delete-btn:hover {background: #b91c1c;}
     .edit-btn {background: #f59e0b;}
     .edit-btn:hover {background: #d97706;}
-    .refresh-btn {background: #16a34a;}
-    .refresh-btn:hover {background: #15803d;}
+    .add-btn {background: #16a34a;}
+    .add-btn:hover {background: #15803d;}
+    .stats {display: flex; gap: 20px; margin-top: 20px;}
+    .card {
+      background: #fff; padding: 20px; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); flex: 1; text-align: center;
+    }
+    .card h3 {margin: 0; color: #2563eb;}
+    h2 {color: #1e3a8a;}
     .hidden {display: none;}
     form {
       background: #fff; padding: 20px; border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 320px; margin: 80px auto;
+      max-width: 320px; margin: 100px auto;
     }
     input, button {padding: 8px; width: 100%; margin-bottom: 10px;}
-    h2 {color: #1e3a8a;}
   </style>
 </head>
 <body>
   <header>
-    <div class="brand">Admin Panel Wisata</div>
+    <div class="brand">Admin Panel Pertanian</div>
     <nav>
-      <a href="index.html">Logout</a>
+      <a href="index.html">Kembali</a>
     </nav>
   </header>
 
-  <!-- Login Admin -->
+  <!-- Halaman Login -->
   <main id="loginPage" class="container">
-    <form id="adminLoginForm">
+    <form onsubmit="loginAdmin(event)">
       <h3 style="text-align:center;color:#1e3a8a;">Login Admin</h3>
       <input type="text" id="adminUser" placeholder="Username" required>
       <input type="password" id="adminPass" placeholder="Password" required>
-      <button type="submit" onclick="loginAdmin(event)">Masuk</button>
+      <button type="submit">Masuk</button>
     </form>
   </main>
 
   <!-- Dashboard Admin -->
   <main id="adminDashboard" class="container hidden">
     <h2>Selamat Datang, Admin!</h2>
-    <p>Berikut data dari pengguna:</p>
 
-    <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+    <div class="stats">
+      <div class="card">
+        <h3 id="countKategori">0</h3>
+        <p>Jumlah Kategori Tanaman</p>
+      </div>
+      <div class="card">
+        <h3 id="countTransaksi">0</h3>
+        <p>Jumlah Transaksi Panen</p>
+      </div>
+    </div>
 
-    <h3>Data Kategori</h3>
+    <h3>Data Kategori Tanaman</h3>
+    <button class="add-btn" onclick="tambahKategori()">+ Tambah Kategori</button>
     <table id="adminCategories">
       <thead>
         <tr>
@@ -84,7 +99,8 @@
       <tbody></tbody>
     </table>
 
-    <h3>Data Transaksi</h3>
+    <h3>Data Transaksi Panen</h3>
+    <button class="add-btn" onclick="tambahTransaksi()">+ Tambah Transaksi</button>
     <table id="adminTransactions">
       <thead>
         <tr>
@@ -99,20 +115,22 @@
   </main>
 
   <script>
-    const adminUser = "admin";
-    const adminPass = "12345";
+    const adminUsername = "admin";
+    const adminPassword = "12345";
 
     const loginPage = document.getElementById('loginPage');
-    const dashboard = document.getElementById('adminDashboard');
+    const adminDashboard = document.getElementById('adminDashboard');
+    const countKategori = document.getElementById('countKategori');
+    const countTransaksi = document.getElementById('countTransaksi');
 
     function loginAdmin(e) {
       e.preventDefault();
-      const user = document.getElementById('adminUser').value;
-      const pass = document.getElementById('adminPass').value;
+      const user = document.getElementById('adminUser').value.trim();
+      const pass = document.getElementById('adminPass').value.trim();
 
-      if (user === adminUser && pass === adminPass) {
+      if (user === adminUsername && pass === adminPassword) {
         loginPage.classList.add('hidden');
-        dashboard.classList.remove('hidden');
+        adminDashboard.classList.remove('hidden');
         loadData();
       } else {
         alert("Username atau Password salah!");
@@ -128,6 +146,9 @@
     function renderAdminData(categories, transactions) {
       const catBody = document.querySelector('#adminCategories tbody');
       const transBody = document.querySelector('#adminTransactions tbody');
+
+      countKategori.textContent = categories.length;
+      countTransaksi.textContent = transactions.length;
 
       catBody.innerHTML = categories.map((c, i) => `
         <tr>
@@ -151,6 +172,27 @@
           </td>
         </tr>
       `).join('');
+    }
+
+    function tambahKategori() {
+      const name = prompt("Masukkan nama kategori tanaman:");
+      if (name) {
+        const data = JSON.parse(localStorage.getItem('categories') || '[]');
+        data.push({ name, createdAt: new Date().toLocaleString() });
+        localStorage.setItem('categories', JSON.stringify(data));
+        loadData();
+      }
+    }
+
+    function tambahTransaksi() {
+      const name = prompt("Masukkan nama transaksi panen:");
+      const status = prompt("Masukkan status pembayaran (Sudah Dibayar / Belum Dibayar):");
+      if (name && status) {
+        const data = JSON.parse(localStorage.getItem('transactions') || '[]');
+        data.push({ name, status, createdAt: new Date().toLocaleString() });
+        localStorage.setItem('transactions', JSON.stringify(data));
+        loadData();
+      }
     }
 
     function editCategory(index) {
@@ -193,16 +235,8 @@
       }
     }
 
-    // Tombol Refresh Data Manual
-    function refreshData() {
-      alert("Data diperbarui dari index & dashboard!");
-      loadData();
-    }
-
-    // Auto Refresh setiap 5 detik (opsional)
-    setInterval(() => {
-      loadData();
-    }, 5000);
+    // Perbarui data otomatis setiap 3 detik
+    setInterval(loadData, 3000);
   </script>
 </body>
 </html>
