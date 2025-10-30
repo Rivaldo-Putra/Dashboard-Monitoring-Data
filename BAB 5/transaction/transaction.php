@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transactions - Dashboard Monitoring Data Pertanian</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand">Dashboard Monitoring Data Pertanian</div>
+    <nav>
+      <a href="../dashbor.php">Dashboard</a>
+      <a href="../categories/categories.php">Categories</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h2>Data Transaksi Pertanian</h2>
+
+    <form id="transForm" class="form-demo">
+      <label>Judul Transaksi</label>
+      <input type="text" id="judul" placeholder="Masukkan judul transaksi" required>
+
+      <label>Jumlah</label>
+      <input type="number" id="jumlah" placeholder="Masukkan jumlah" required>
+
+      <button type="submit" class="btn">Simpan</button>
+      <button type="reset" class="btn secondary">Batal</button>
+    </form>
+
+    <table class="table" id="transTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Judul</th>
+          <th>Jumlah</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <script>
+    const form = document.getElementById('transForm');
+    const tableBody = document.querySelector('#transTable tbody');
+
+    // Fungsi untuk menampilkan data transaksi dari localStorage
+    function loadTransactions() {
+      tableBody.innerHTML = '';
+      const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+      transactions.forEach((t, i) => {
+        const row = `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${t.judul}</td>
+            <td>Rp ${parseInt(t.jumlah).toLocaleString('id-ID')}</td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
+    }
+
+    // Event saat tombol Simpan ditekan
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const judul = document.getElementById('judul').value.trim();
+      const jumlah = document.getElementById('jumlah').value.trim();
+      if (!judul || !jumlah) return;
+
+      const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+      transactions.push({ judul, jumlah });
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+
+      alert('Transaksi berhasil disimpan!');
+      form.reset();
+      loadTransactions();
+    });
+
+    // Tampilkan data saat halaman dibuka
+    loadTransactions();
+  </script>
+</body>
+</html>
