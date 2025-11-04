@@ -115,3 +115,13 @@ body {
   font-weight: bold;
   color: #004d40;
 }
+body {
+  font-family: Inter, system-ui, Arial, sans-serif;
+  margin: 0;
+  background: 
+    linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.3)),
+    url('./assets/Harvest.jpg') center/cover no-repeat fixed;
+  background-color: #f0f4f8;
+  color: #123;
+  min-height: 100vh;
+}

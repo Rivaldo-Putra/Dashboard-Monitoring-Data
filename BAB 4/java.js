@@ -1,188 +1,193 @@
-// ===== Web Storage Helper =====
-function getData(key) {
-  try {
-    return JSON.parse(localStorage.getItem(key) || '[]');
-  } catch (e) {
-    console.error('Error parsing', key, e);
-    return [];
-  }
-}
+// ===== STORAGE =====
+const getData = (key) => JSON.parse(localStorage.getItem(key) || '[]');
+const setData = (key, data) => localStorage.setItem(key, JSON.stringify(data));
 
-function setData(key, data) {
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-  } catch (e) {
-    console.error('Error saving', key, e);
-  }
-}
-
-// ===== Inisialisasi Data =====
+// ===== DATA =====
 let categories = getData('categories');
 let transactions = getData('transactions');
+let panen = getData('panen');
 
-// ===== Toast / Snackbar =====
-function showToast(msg, type = 'default', duration = 3000) {
+// ===== TOAST =====
+const showToast = (msg, type = 'default', dur = 3000) => {
   const s = document.getElementById('snackbar');
-  if (!s) return;
   s.textContent = msg;
   s.className = 'show';
-  if (type === 'success') {
-    s.classList.add('success');
-    s.classList.remove('error');
-  } else if (type === 'error') {
-    s.classList.add('error');
-    s.classList.remove('success');
-  } else s.classList.remove('success', 'error');
-  setTimeout(() => {
-    s.className = '';
-    s.classList.remove('success', 'error');
-  }, duration);
-}
+  if (type === 'success') s.classList.add('success');
+  if (type === 'error') s.classList.add('error');
+  setTimeout(() => s.className = '', dur);
+};
 
-// ===== Update Stats =====
-function updateStats() {
-  document.getElementById('countCategories')?.textContent = categories.length;
-  document.getElementById('countTransactions')?.textContent = transactions.length;
+// ===== UPDATE STATS =====
+const updateStats = () => {
+  ['countCategories', 'dashCategories'].forEach(id => 
+    document.getElementById(id)?.textContent = categories.length
+  );
+  ['countTransactions', 'dashTransactions'].forEach(id => 
+    document.getElementById(id)?.textContent = transactions.length
+  );
+  const total = panen.reduce((a, x) => a + (parseFloat(x.ton) || 0), 0).toFixed(2);
+  document.getElementById('dashTotal')?.textContent = total;
   setData('categories', categories);
   setData('transactions', transactions);
-  renderTables(); // perbarui tabel setiap kali data berubah
-}
+  setData('panen', panen);
+  renderTables();
+};
 
-// ===== Render Tabel =====
-function renderTables() {
-  const catTable = document.getElementById('tableCategories')?.querySelector('tbody');
-  const trxTable = document.getElementById('tableTransactions')?.querySelector('tbody');
+// ===== RENDER TABEL =====
+const renderTables = () => {
+  const cat = document.querySelector('#tableCategories tbody');
+  const trx = document.querySelector('#tableTransactions tbody');
+  cat.innerHTML = categories.map((c, i) => `
+    <tr><td>${i+1}</td><td>${c.name}</td><td>${c.createdAt}</td>
+    <td><button class="btn danger" onclick="deleteCategory(${i})">Hapus</button></td></tr>
+  `).join('') || '<tr><td colspan="4">Kosong</td></tr>';
+  trx.innerHTML = transactions.map((t, i) => `
+    <tr><td>${i+1}</td><td>${t.name}</td><td>${t.status}</td><td>${t.createdAt}</td>
+    <td><button class="btn danger" onclick="deleteTransaction(${i})">Hapus</button></td></tr>
+  `).join('') || '<tr><td colspan="5">Kosong</td></tr>';
+};
 
-  if (catTable) {
-    catTable.innerHTML = categories.map((c, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td>${c.name}</td>
-        <td>${c.createdAt}</td>
-        <td><button onclick="deleteCategory(${i})">Hapus</button></td>
-      </tr>
-    `).join('') || `<tr><td colspan="4">Belum ada kategori</td></tr>`;
+// ===== HAPUS =====
+window.deleteCategory = (i) => { if (confirm('Hapus?')) { categories.splice(i,1); updateStats(); showToast('Dihapus','success'); }};
+window.deleteTransaction = (i) => { if (confirm('Hapus?')) { transactions.splice(i,1); updateStats(); showToast('Dihapus','success'); }};
+
+// ===== POPUP =====
+const openPopup = (title, html, cb) => {
+  document.getElementById('popupTitle').textContent = title;
+  document.getElementById('popupContent').innerHTML = html;
+  document.getElementById('popupOverlay').classList.remove('hidden');
+  const btn = document.querySelector('#popupContent button');
+  if (btn) {
+    const newBtn = btn.cloneNode(true);
+    btn.replaceWith(newBtn);
+    newBtn.addEventListener('click', () => { cb(); document.getElementById('popupOverlay').classList.add('hidden'); });
   }
+};
 
-  if (trxTable) {
-    trxTable.innerHTML = transactions.map((t, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td>${t.name}</td>
-        <td>${t.status}</td>
-        <td>${t.createdAt}</td>
-        <td><button onclick="deleteTransaction(${i})">Hapus</button></td>
-      </tr>
-    `).join('') || `<tr><td colspan="5">Belum ada transaksi</td></tr>`;
-  }
-}
-
-// ===== Hapus Data =====
-function deleteCategory(i) {
-  if (confirm("Yakin hapus kategori ini?")) {
-    categories.splice(i, 1);
-    updateStats();
-    showToast('Kategori dihapus', 'success');
-  }
-}
-
-function deleteTransaction(i) {
-  if (confirm("Yakin hapus transaksi ini?")) {
-    transactions.splice(i, 1);
-    updateStats();
-    showToast('Transaksi dihapus', 'success');
-  }
-}
-
-// ===== Popup =====
-const popupOverlay = document.getElementById('popupOverlay');
-const popupTitle = document.getElementById('popupTitle');
-const popupContent = document.getElementById('popupContent');
-const closePopupBtn = document.getElementById('closePopupBtn');
-closePopupBtn?.addEventListener('click', () => popupOverlay.style.display = 'none');
-
-function openPopup(title, contentHTML, submitCallback) {
-  popupTitle.textContent = title;
-  popupContent.innerHTML = contentHTML;
-
-  const submitBtn = popupContent.querySelector('button');
-  const newSubmit = submitBtn.cloneNode(true);
-  submitBtn.parentNode.replaceChild(newSubmit, submitBtn);
-
-  newSubmit.addEventListener('click', () => {
-    submitCallback();
-    popupOverlay.style.display = 'none';
-  });
-
-  popupOverlay.style.display = 'flex';
-}
-
-// ===== Popup 1: Tambah Kategori =====
-document.getElementById('popup1Btn')?.addEventListener('click', () => {
-  openPopup('Tambah Kategori', `
-    <input type="text" id="popupCatName" placeholder="Nama kategori" style="width:90%;padding:6px;margin-bottom:6px;">
-    <button class="btn">Tambah</button>
-  `, () => {
-    const name = document.getElementById('popupCatName').value.trim();
-    if (name) {
-      categories.push({ name, createdAt: new Date().toLocaleString() });
-      updateStats();
-      showToast('Kategori "' + name + '" ditambahkan', 'success', 2500);
-    }
-  });
+document.getElementById('closePopupBtn')?.addEventListener('click', () => {
+  document.getElementById('popupOverlay').classList.add('hidden');
 });
 
-// ===== Popup 2: Tambah Transaksi =====
-document.getElementById('popup2Btn')?.addEventListener('click', () => {
-  openPopup('Tambah Transaksi', `
-    <input type="text" id="popupTrxName" placeholder="Nama transaksi" style="width:90%;padding:6px;margin-bottom:6px;">
-    <select id="popupTrxStatus" style="width:95%;padding:6px;margin-bottom:6px;">
-      <option value="Belum Dibayar">Belum Dibayar</option>
-      <option value="Sudah Dibayar">Sudah Dibayar</option>
-    </select>
-    <button class="btn">Tambah</button>
-  `, () => {
-    const name = document.getElementById('popupTrxName').value.trim();
-    const status = document.getElementById('popupTrxStatus').value;
-    if (name) {
-      transactions.push({ name, status, createdAt: new Date().toLocaleString() });
-      updateStats();
-      showToast('Transaksi "' + name + '" ditambahkan', 'success', 2500);
-    }
-  });
-});
-
-// ===== Tombol Demo =====
+// ===== TOMBOL AKSI =====
 document.getElementById('addCatBtn')?.addEventListener('click', () => {
-  const name = 'Kategori Demo ' + Math.floor(Math.random() * 900 + 100);
-  categories.push({ name, createdAt: new Date().toLocaleString() });
-  updateStats();
-  showToast('Kategori "' + name + '" ditambahkan', 'success', 2500);
+  const name = 'Kategori ' + Math.floor(Math.random() * 999);
+  categories.push({ name, createdAt: new Date().toLocaleString('id-ID') });
+  updateStats(); showToast('Ditambah', 'success');
 });
 
 document.getElementById('addTrxBtn')?.addEventListener('click', () => {
-  const name = 'Transaksi Demo ' + Math.floor(Math.random() * 900 + 100);
-  const status = Math.random() < 0.5 ? 'Belum Dibayar' : 'Sudah Dibayar';
-  transactions.push({ name, status, createdAt: new Date().toLocaleString() });
-  updateStats();
-  showToast('Transaksi "' + name + '" ditambahkan', 'success', 2500);
+  const name = 'Transaksi ' + Math.floor(Math.random() * 999);
+  const status = Math.random() > 0.5 ? 'Sudah Dibayar' : 'Belum Dibayar';
+  transactions.push({ name, status, createdAt: new Date().toLocaleString('id-ID') });
+  updateStats(); showToast('Ditambah', 'success');
 });
 
-// ===== Tombol Toast =====
-document.getElementById('toastSuccessBtn')?.addEventListener('click', () => showToast('Notifikasi sukses!', 'success'));
-document.getElementById('toastErrorBtn')?.addEventListener('click', () => showToast('Terjadi kesalahan!', 'error'));
+document.getElementById('popup1Btn')?.addEventListener('click', () => {
+  openPopup('Tambah Kategori', `<input type="text" id="popupCatName" placeholder="Nama"><button class="btn">Tambah</button>`, () => {
+    const name = document.getElementById('popupCatName').value.trim();
+    if (name) { categories.push({ name, createdAt: new Date().toLocaleString('id-ID') }); updateStats(); showToast('Ditambah','success'); }
+  });
+});
 
-// ===== Fetch Quote (Asynchronous + Promise + Fetch) =====
+document.getElementById('popup2Btn')?.addEventListener('click', () => {
+  openPopup('Tambah Transaksi', `<input type="text" id="popupTrxName" placeholder="Nama"><select id="popupTrxStatus"><option>Belum Dibayar</option><option>Sudah Dibayar</option></select><button class="btn">Tambah</button>`, () => {
+    const name = document.getElementById('popupTrxName').value.trim();
+    const status = document.getElementById('popupTrxStatus').value;
+    if (name) { transactions.push({ name, status, createdAt: new Date().toLocaleString('id-ID') }); updateStats(); showToast('Ditambah','success'); }
+  });
+});
+
+document.getElementById('toastSuccessBtn')?.addEventListener('click', () => showToast('Sukses!','success'));
+document.getElementById('toastErrorBtn')?.addEventListener('click', () => showToast('Error!','error'));
+
 document.getElementById('btnShowQuote')?.addEventListener('click', async () => {
   try {
     const res = await fetch('https://api.quotable.io/random');
-    const data = await res.json();
-    showToast(`Quote: "${data.content}" — ${data.author}`, 'success', 4000);
-  } catch (e) {
-    showToast('Gagal memuat quote!', 'error', 3000);
-  }
+    const d = await res.json();
+    showToast(`"${d.content}" — ${d.author}`, 'success', 5000);
+  } catch { showToast('Gagal ambil quote','error'); }
 });
 
-// ===== Inisialisasi =====
-updateStats();
-renderTables();
+// ===== NAVIGASI =====
+window.showPage = (page) => {
+  document.querySelectorAll('[id^="page-"]').forEach(p => p.classList.add('hidden'));
+  document.getElementById(`page-${page}`).classList.remove('hidden');
+  if (page === 'dashboard') loadDashboard();
+  updateNav();
+};
+
+window.logout = () => {
+  localStorage.removeItem('user');
+  showToast('Logout sukses','success');
+  showPage('beranda');
+};
+
+const updateNav = () => {
+  const u = JSON.parse(localStorage.getItem('user') || '{"isLoggedIn":false}');
+  document.getElementById('navLogin').classList.toggle('hidden', u.isLoggedIn);
+  document.getElementById('navDaftar').classList.toggle('hidden', u.isLoggedIn);
+  document.getElementById('btnLogout').classList.toggle('hidden', !u.isLoggedIn);
+  document.getElementById('userInfo').textContent = u.isLoggedIn ? `(${u.email})` : '';
+};
+
+// ===== LOGIN & DAFTAR =====
+document.getElementById('formDaftar').onsubmit = (e) => {
+  e.preventDefault();
+  const n = document.getElementById('namaDaftar').value.trim();
+  const em = document.getElementById('emailDaftar').value.trim();
+  const p = document.getElementById('passDaftar').value;
+  if (!n || !em || !p) return showToast('Isi semua!','error');
+  const daftar = getData('daftarPetani');
+  if (daftar.some(x => x.email === em)) return showToast('Email sudah ada','error');
+  daftar.push({nama:n,email:em,password:p});
+  setData('daftarPetani', daftar);
+  localStorage.setItem('user', JSON.stringify({isLoggedIn:true,nama:n,email:em}));
+  showToast('Daftar sukses!','success');
+  setTimeout(() => showPage('dashboard'), 1500);
+};
+
+document.getElementById('formLogin').onsubmit = (e) => {
+  e.preventDefault();
+  const em = document.getElementById('emailLogin').value.trim();
+  const p = document.getElementById('passLogin').value;
+  const user = getData('daftarPetani').find(x => x.email === em && x.password === p);
+  if (!user) return showToast('Salah email/sandi','error');
+  localStorage.setItem('user', JSON.stringify({isLoggedIn:true,nama:user.nama,email:em}));
+  showToast('Login sukses!','success');
+  setTimeout(() => showPage('dashboard'), 1500);
+};
+
+// ===== DASHBOARD =====
+const loadDashboard = () => {
+  const u = JSON.parse(localStorage.getItem('user') || '{"isLoggedIn":false}');
+  if (!u.isLoggedIn) return setTimeout(() => showPage('login'), 1000);
+  document.getElementById('welcomeMsg').textContent = `Selamat datang, ${u.nama}!`;
+  updateStats();
+  if (panen.length) renderChart();
+};
+
+const renderChart = () => {
+  const ctx = document.getElementById('chartPanen').getContext('2d');
+  const data = panen.slice(-7).reverse();
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(x => new Date(x.tanggal || Date.now()).toLocaleDateString('id-ID')),
+      datasets: [{
+        label: 'Ton',
+        data: data.map(x => parseFloat(x.ton) || 0),
+        borderColor: '#2f855a',
+        backgroundColor: 'rgba(47,133,90,0.1)',
+        fill: true
+      }]
+    },
+    options: { responsive: true }
+  });
+};
+
+// ===== INIT =====
+window.addEventListener('load', () => {
+  updateStats();
+  const u = JSON.parse(localStorage.getItem('user') || '{"isLoggedIn":false}');
+  showPage(u.isLoggedIn ? 'dashboard' : 'beranda');
+});
