@@ -1,7 +1,7 @@
 // === Navigasi Single Page ===
 const pages = {
   home: `
-    <h2>Selamat Datang di Dashboard Wisata</h2>
+    <h2>Selamat Datang di Dashboard Pertanian</h2>
     <div class="grid">
       <div class="card">
         <h3>Statistik Data</h3>
