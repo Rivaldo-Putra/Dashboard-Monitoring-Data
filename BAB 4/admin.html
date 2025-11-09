@@ -4,28 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pertanian Admin</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/icon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
   <style>
     :root {
-      --primary: #04b40d;     /* HIJAU TUA */
-      --sidebar-bg: #07c539;  /* HIJAU MUDA */
+      --primary: #04b40d;
+      --sidebar-bg: #07c539;
       --bg: #f9fafb;
       --text: #1f2937;
       --border: #e5e7eb;
+      --success: #16a34a;
+      --danger: #ef4444;
     }
     * {box-sizing: border-box;margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;}
     body {background: var(--bg); color: var(--text); display: flex; min-height: 100vh;}
     
     .sidebar {
       width: 260px; background: var(--sidebar-bg); color: #fff; padding: 20px 0; position: fixed; height: 100%; left: 0; top: 0; z-index: 1000;
-      box-shadow: 2px 0 10px rgba(0,0,0,.1);
+      box-shadow: 2px 0 10px rgba(0,0,0,.1); transition: width 0.3s ease;
     }
     .sidebar .logo {font-size: 1.5rem; font-weight: 700; padding: 0 24px; margin-bottom: 30px;}
     .sidebar .logo i {margin-right: 8px;}
     .sidebar a {
       display: flex; align-items: center; padding: 12px 24px; color: #fff; text-decoration: none; font-size: .95rem;
-      transition: .2s; border-left: 4px solid transparent;
+      transition: .2s; border-left: 4px solid transparent; cursor: pointer;
     }
     .sidebar a:hover, .sidebar a.active {background: rgba(255,255,255,.2); border-left-color: #fff;}
     .sidebar a i {margin-right: 12px; width: 20px; text-align: center;}
@@ -57,7 +61,15 @@
     th, td {padding:12px;text-align:left;}
     tbody tr {border-bottom:1px solid #eee;}
     tbody tr:last-child {border-bottom:none;}
-    button.danger {background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.8rem;}
+    button.danger {background:var(--danger);color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.8rem;}
+    button.danger:hover {background:#dc2626;}
+
+    @media (max-width: 992px) {
+      .sidebar {width: 80px;}
+      .sidebar .logo span, .sidebar a span {display: none;}
+      .sidebar a {justify-content: center;}
+      .main-content {margin-left: 80px;}
+    }
   </style>
 </head>
 <body>
@@ -65,25 +77,25 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
-      <i class="fas fa-seedling"></i> Pertanian
+      <i class="fas fa-seedling"></i> <span>Pertanian</span>
     </div>
     <nav>
       <a href="#" class="active" onclick="showSection('dashboard')">
-        <i class="fas fa-tachometer-alt"></i> Dashboard
+        <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
       </a>
-      <a href="categories/categories.html">
-        <i class="fas fa-tags"></i> Categories
+      <a href="categories/categories.html" target="_blank">
+        <i class="fas fa-tags"></i> <span>Categories</span>
       </a>
-      <a href="transaction/transaction.html">
-        <i class="fas fa-exchange-alt"></i> Transaction
+      <a href="transaction/transaction.html" target="_blank">
+        <i class="fas fa-exchange-alt"></i> <span>Transaction</span>
       </a>
       <a href="#" class="logout" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i> Log out
+        <i class="fas fa-sign-out-alt"></i> <span>Log out</span>
       </a>
     </nav>
   </aside>
 
-  <!-- MAIN -->
+  <!-- MAIN CONTENT -->
   <div class="main-content">
     <header class="topbar">
       <div></div>
@@ -94,54 +106,90 @@
     </header>
 
     <main class="content">
-
-      <!-- DASHBOARD -->
       <section id="section-dashboard">
-        <h1>Selamat Datang Admin</h1>
-        <p>Kelola semua data pertanian dengan mudah</p>
+        <h1>Selamat Datang, Admin!</h1>
+        <p>Kelola semua data pertanian dengan mudah dan cepat.</p>
 
         <div class="grid">
           <div class="card">
             <h3>Total Kategori</h3>
-            <p style="font-size:1.5rem;font-weight:700;color:var(--primary);" id="totalCat">0</p>
+            <p style="font-size:1.8rem;font-weight:700;color:var(--primary);" id="totalCat">0</p>
           </div>
           <div class="card">
             <h3>Total Transaksi</h3>
-            <p style="font-size:1.5rem;font-weight:700;color:var(--primary);" id="totalTrx">0</p>
+            <p style="font-size:1.8rem;font-weight:700;color:var(--primary);" id="totalTrx">0</p>
           </div>
           <div class="card">
             <h3>Status Sistem</h3>
-            <p style="color:#16a34a;font-weight:600;">Semua berjalan normal</p>
+            <p style="color:var(--success);font-weight:600;">Semua berjalan normal</p>
           </div>
         </div>
       </section>
-
     </main>
   </div>
 
   <script>
+    function showSection(sectionId) {
+      const sections = document.querySelectorAll('section[id^="section-"]');
+      sections.forEach(sec => sec.classList.add('hidden'));
+      const target = document.getElementById('section-' + sectionId);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.sidebar a').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('onclick')?.includes(sectionId)) {
+          link.classList.add('active');
+        }
+      });
+    }
+
     function updateStats() {
-      const cat = JSON.parse(localStorage.getItem('categories') || '[]').length;
-      const trx = JSON.parse(localStorage.getItem('transactions') || '[]').length;
-      document.getElementById('totalCat').textContent = cat;
-      document.getElementById('totalTrx').textContent = trx;
+      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+      document.getElementById('totalCat').textContent = categories.length;
+      document.getElementById('totalTrx').textContent = transactions.length;
     }
 
     function logout() {
       localStorage.removeItem('user');
+      alert('Anda berhasil logout!');
       window.location.href = 'index.html';
     }
 
-    window.onload = () => {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+    // CEK LOGIN SAAT HALAMAN DIMUAT
+    window.onload = function() {
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        alert('Silakan login terlebih dahulu!');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let user;
+      try {
+        user = JSON.parse(userData);
+      } catch (e) {
+        alert('Data login rusak. Silakan login ulang.');
+        window.location.href = 'login.html';
+        return;
+      }
+
       if (!user.isLoggedIn) {
         alert('Silakan login terlebih dahulu!');
         window.location.href = 'login.html';
         return;
       }
-      document.getElementById('adminName').textContent = user.email;
+
+      // Tampilkan nama
+      document.getElementById('adminName').textContent = user.email || user.name || 'Admin';
+
+      // Update statistik
       updateStats();
+      showSection('dashboard');
     };
+
+    setInterval(updateStats, 5000);
   </script>
+
 </body>
 </html>

@@ -15,23 +15,57 @@
   <main style="max-width:500px;margin:40px auto;padding:16px;">
     <div style="background:#fff;padding:24px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);">
       <form id="catForm">
+        <!-- NAMA KATEGORI -->
         <label style="display:block;margin-bottom:8px;font-weight:600;">Nama Kategori</label>
-        <input type="text" id="catName" style="width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:16px;" required>
-        <button type="submit" style="background:#24b300;color:#fff;padding:10px 16px;border:none;border-radius:8px;cursor:pointer;">Simpan</button>
+        <input type="text" id="catName" style="width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:16px;" placeholder="Contoh: Padi" required>
+
+        <!-- TANGGAL DIBUAT -->
+        <label style="display:block;margin-bottom:8px;font-weight:600;">Tanggal Dibuat</label>
+        <input type="date" id="catDate" style="width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:16px;" required>
+
+        <!-- TOMBOL SIMPAN -->
+        <button type="submit" style="background:#24b300;color:#fff;padding:10px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Simpan</button>
       </form>
     </div>
   </main>
 
   <script>
+    // Auto set tanggal hari ini
+    document.getElementById('catDate').valueAsDate = new Date();
+
     document.getElementById('catForm').onsubmit = e => {
       e.preventDefault();
+
       const name = document.getElementById('catName').value.trim();
-      if (!name) return alert('Isi nama kategori!');
+      const dateInput = document.getElementById('catDate').value;
+
+      if (!name) {
+        alert('Isi nama kategori!');
+        return;
+      }
+      if (!dateInput) {
+        alert('Pilih tanggal!');
+        return;
+      }
+
+      // Format tanggal ke Indonesia
+      const date = new Date(dateInput);
+      const createdAt = date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      // Simpan ke localStorage
       const cats = JSON.parse(localStorage.getItem('categories') || '[]');
-      cats.push({ name, createdAt: new Date().toLocaleString('id-ID') });
+      cats.push({ name, createdAt, date: dateInput });
       localStorage.setItem('categories', JSON.stringify(cats));
-      alert('Kategori disimpan!');
+
+      alert(`Kategori "${name}" disimpan!\nTanggal: ${createdAt}`);
       e.target.reset();
+
+      // Auto set tanggal ke hari ini lagi
+      document.getElementById('catDate').valueAsDate = new Date();
     };
   </script>
 </body>

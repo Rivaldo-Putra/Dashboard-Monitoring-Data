@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pertanian Admin</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/icon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
   <style>
     :root {
       --primary: #04b40d;
@@ -13,24 +15,25 @@
       --bg: #f9fafb;
       --text: #1f2937;
       --border: #e5e7eb;
+      --success: #16a34a;
+      --danger: #ef4444;
     }
     * {box-sizing: border-box;margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;}
     body {background: var(--bg); color: var(--text); display: flex; min-height: 100vh;}
-    
+   
     .sidebar {
       width: 260px; background: var(--sidebar-bg); color: #fff; padding: 20px 0; position: fixed; height: 100%; left: 0; top: 0; z-index: 1000;
-      box-shadow: 2px 0 10px rgba(0,0,0,.1);
+      box-shadow: 2px 0 10px rgba(0,0,0,.1); transition: width 0.3s ease;
     }
     .sidebar .logo {font-size: 1.5rem; font-weight: 700; padding: 0 24px; margin-bottom: 30px;}
     .sidebar .logo i {margin-right: 8px;}
     .sidebar a {
       display: flex; align-items: center; padding: 12px 24px; color: #fff; text-decoration: none; font-size: .95rem;
-      transition: .2s; border-left: 4px solid transparent;
+      transition: .2s; border-left: 4px solid transparent; cursor: pointer;
     }
     .sidebar a:hover, .sidebar a.active {background: rgba(255,255,255,.2); border-left-color: #fff;}
     .sidebar a i {margin-right: 12px; width: 20px; text-align: center;}
     .sidebar .logout {margin-top: auto; border-top: 1px solid rgba(255,255,255,.3); padding-top: 20px;}
-
     .main-content {margin-left: 260px; flex: 1; padding: 0;}
     .topbar {
       background: #fff; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;
@@ -38,11 +41,9 @@
     }
     .topbar .user {font-size: .9rem; color: #6b7280;}
     .topbar .user i {margin-right: 6px;}
-
     .content {padding: 40px; min-height: calc(100vh - 64px);}
     .content h1 {font-size: 1.8rem; margin-bottom: 8px; color: #1f2937;}
     .content p {color: #6b7280; margin-bottom: 30px;}
-
     .grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 20px;}
     .card {
       background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08);
@@ -50,34 +51,45 @@
     }
     .card h3 {margin-bottom: 12px; color: #374151;}
     .card p {color: #6b7280; font-size: .95rem;}
-
     .hidden {display: none;}
+    table {width:100%;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.08);margin-top:20px;}
+    thead {background:var(--primary);color:#fff;}
+    th, td {padding:12px;text-align:left;}
+    tbody tr {border-bottom:1px solid #eee;}
+    tbody tr:last-child {border-bottom:none;}
+    button.danger {background:var(--danger);color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.8rem;}
+    button.danger:hover {background:#dc2626;}
+    @media (max-width: 992px) {
+      .sidebar {width: 80px;}
+      .sidebar .logo span, .sidebar a span {display: none;}
+      .sidebar a {justify-content: center;}
+      .main-content {margin-left: 80px;}
+    }
   </style>
 </head>
 <body>
-
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
-      <i class="fas fa-seedling"></i> Pertanian
+      <i class="fas fa-seedling"></i> <span>Pertanian</span>
     </div>
     <nav>
       <a href="#" class="active" onclick="showSection('dashboard')">
-        <i class="fas fa-tachometer-alt"></i> Dashboard
+        <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
       </a>
       <a href="categories/categories.php">
-        <i class="fas fa-tags"></i> Categories
+        <i class="fas fa-tags"></i> <span>Categories</span>
       </a>
       <a href="transaction/transaction.php">
-        <i class="fas fa-exchange-alt"></i> Transaction
+        <i class="fas fa-exchange-alt"></i> <span>Transaction</span>
       </a>
       <a href="#" class="logout" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i> Log out
+        <i class="fas fa-sign-out-alt"></i> <span>Log out</span>
       </a>
     </nav>
   </aside>
 
-  <!-- MAIN -->
+  <!-- MAIN CONTENT -->
   <div class="main-content">
     <header class="topbar">
       <div></div>
@@ -86,25 +98,22 @@
         <span id="adminName">Admin Pertanian</span>
       </div>
     </header>
-
     <main class="content">
-      <!-- DASHBOARD -->
       <section id="section-dashboard">
-        <h1>Selamat Datang Admin</h1>
-        <p>Kelola semua data pertanian dengan mudah</p>
-
+        <h1>Selamat Datang, Admin!</h1>
+        <p>Kelola semua data pertanian dengan mudah dan cepat.</p>
         <div class="grid">
           <div class="card">
             <h3>Total Kategori</h3>
-            <p style="font-size:1.5rem;font-weight:700;color:var(--primary);" id="totalCat">0</p>
+            <p style="font-size:1.8rem;font-weight:700;color:var(--primary);" id="totalCat">0</p>
           </div>
           <div class="card">
             <h3>Total Transaksi</h3>
-            <p style="font-size:1.5rem;font-weight:700;color:var(--primary);" id="totalTrx">0</p>
+            <p style="font-size:1.8rem;font-weight:700;color:var(--primary);" id="totalTrx">0</p>
           </div>
           <div class="card">
             <h3>Status Sistem</h3>
-            <p style="color:#16a34a;font-weight:600;">Semua berjalan normal</p>
+            <p style="color:var(--success);font-weight:600;">Semua berjalan normal</p>
           </div>
         </div>
       </section>
@@ -112,33 +121,59 @@
   </div>
 
   <script>
+    function showSection(sectionId) {
+      const sections = document.querySelectorAll('section[id^="section-"]');
+      sections.forEach(sec => sec.classList.add('hidden'));
+      const target = document.getElementById('section-' + sectionId);
+      if (target) target.classList.remove('hidden');
+      document.querySelectorAll('.sidebar a').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('onclick')?.includes(sectionId)) {
+          link.classList.add('active');
+        }
+      });
+    }
+
     function updateStats() {
-      const categories = JSON.parse(localStorage.getItem('categories') || '[]').length;
-      const transactions = JSON.parse(localStorage.getItem('transactions') || '[]').length;
-      document.getElementById('totalCat').textContent = categories;
-      document.getElementById('totalTrx').textContent = transactions;
+      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+      document.getElementById('totalCat').textContent = categories.length;
+      document.getElementById('totalTrx').textContent = transactions.length;
     }
 
     function logout() {
-      localStorage.removeItem('user');
-      window.location.href = 'index.php';
+      if (confirm('Yakin ingin logout?')) {
+        localStorage.removeItem('user');
+        alert('Anda berhasil logout!');
+        window.location.href = 'index.php'; // LANGSUNG KE INDEX.PHP
+      }
     }
 
-    function showSection(section) {
-      // Bisa ditambah section lain nanti
-    }
-
-    window.onload = () => {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      
-      if (!user.isLoggedIn || user.role !== 'admin') {
-        alert('Akses ditolak! Silakan login sebagai admin.');
+    // CEK LOGIN
+    window.onload = function() {
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        alert('Silakan login terlebih dahulu!');
         window.location.href = 'login.php';
         return;
       }
-
-      document.getElementById('adminName').textContent = user.email || 'Admin';
+      let user;
+      try {
+        user = JSON.parse(userData);
+      } catch (e) {
+        alert('Data login rusak. Silakan login ulang.');
+        window.location.href = 'login.php';
+        return;
+      }
+      if (!user.isLoggedIn) {
+        alert('Silakan login terlebih dahulu!');
+        window.location.href = 'login.php';
+        return;
+      }
+      document.getElementById('adminName').textContent = user.email || user.name || 'Admin';
       updateStats();
+      showSection('dashboard');
+      setInterval(updateStats, 5000);
     };
   </script>
 </body>
