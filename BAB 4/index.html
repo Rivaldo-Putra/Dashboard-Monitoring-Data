@@ -232,20 +232,20 @@
     showToast('Mode Developer Aktif!', 'warning');
   });
 
-  // 2. Scroll di Jumbotron → Notif
-  let scrolled = false;
-  document.getElementById('jumbotronScroll').addEventListener('wheel', () => {
-    if (!scrolled) {
-      showToast('Anda sedang menjelajah!', 'info');
-      scrolled = true;
-    }
-  });
+  // 2. Scroll  → Notif
+let scrolled = false;
+window.addEventListener('wheel', () => {
+  if (!scrolled) {
+    showToast('Anda sedang menjelajah!', 'info');
+    scrolled = true;
+  }
+});
 
   // 3. Klik Kanan di Card → Info Pembuat
   document.getElementById('cardContainer').addEventListener('contextmenu', (e) => {
     if (e.target.closest('.card')) {
       e.preventDefault();
-      showToast('Dibuat oleh: [NAMA ANDA] - 2025', 'info');
+      showToast('Dibuat oleh: Rivaldo Candra Putra - 2025', 'info');
     }
   });
 
