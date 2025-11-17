@@ -9,7 +9,7 @@
 <body>
   <header style="background:#02b92a;color:#fff;padding:14px 20px;">
     <div style="font-weight:700;">Tambah Kategori</div>
-    <nav><a href="../admin.php" style="color:#fff;text-decoration:none;">Kembali</a></nav>
+    <nav><a href="../admin.php/categories.php" style="color:#fff;text-decoration:none;">Kembali</a></nav>
   </header>
 
   <main style="max-width:500px;margin:40px auto;padding:16px;">
@@ -24,22 +24,31 @@
   </main>
 
   <script>
-    document.getElementById('catForm').onsubmit = async function(e) {
+    document.getElementById('catForm').onsubmit = function(e) {
       e.preventDefault();
       const name = document.getElementById('catName').value.trim();
       if (!name) return alert('Nama kategori wajib diisi!');
 
-      const res = await fetch('categories/categories-proses.php?action=add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name })
-      });
-      const data = await res.json();
+      // Baca data dari localStorage
+      let cats = JSON.parse(localStorage.getItem('categories') || '[]');
 
-      alert(data.message);
-      if (data.success) {
-        this.reset();
+      // Cek duplikat
+      if (cats.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+        return alert('Kategori "' + name + '" sudah ada!');
       }
+
+      // Tambah kategori baru
+      cats.push({
+        id: Date.now(),
+        name: name,
+        created_at: new Date().toISOString().split('T')[0]
+      });
+
+      // Simpan ke localStorage
+      localStorage.setItem('categories', JSON.stringify(cats));
+
+      alert('Kategori "' + name + '" berhasil disimpan!');
+      this.reset();
     };
   </script>
 </body>
