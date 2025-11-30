@@ -1,212 +1,65 @@
-<?php
-// transaction/transaction.php
-// File PHP untuk keamanan & struktur
-?>
+<?php require '../koneksi.php'; ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transaksi Panen & Pembelian</title>
-  <link rel="icon" href="../assets/icon.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <title>Daftar Transaksi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <style>
-    :root {--primary:#04b40d;--bg:#f9fafb;--text:#1f2937;--border:#e5e7eb;--danger:#ef4444;}
-    * {box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;}
-    body {background:var(--bg);color:var(--text);padding:20px;}
-    header {background:var(--primary);color:#fff;padding:16px 20px;border-radius:12px 12px 0 0;box-shadow:0 4px 12px rgba(0,0,0,.08);position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;}
-    header h1 {font-size:1.3rem;font-weight:700;cursor:pointer;}
-    nav a {color:#fff;text-decoration:none;font-weight:600;margin-left:12px;}
-    main {max-width:1200px;margin:30px auto;}
-    .form-container {background:#fff;padding:24px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);margin-bottom:24px;}
-    .form-group {margin-bottom:16px;}
-    .form-group label {display:block;margin-bottom:6px;font-weight:600;color:#374151;}
-    .form-group input, .form-group select, .form-group textarea {width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;font-size:1rem;}
-    .btn {padding:10px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.9rem;}
-    .btn-primary {background:var(--primary);color:#fff;}
-    .btn-secondary {background:#6b7280;color:#fff;margin-left:8px;}
-    table {width:100%;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.08);font-size:0.9rem;}
-    thead {background:var(--primary);color:#fff;}
-    th, td {padding:12px;text-align:left;vertical-align:top;}
-    tbody tr {border-bottom:1px solid #eee;}
-    .action-btn {padding:6px 10px;border:none;border-radius:6px;cursor:pointer;font-size:.8rem;margin:0 4px;}
+    body {font-family:Inter,system-ui;background:#f9fafb;color:#1f2937;margin:0;}
+    .header {background:#07c539;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
+    .container {max-width:1300px;margin:40px auto;padding:20px;}
+    table {width:100%;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);}
+    th {background:#07c539;color:#fff;padding:16px;text-align:left;}
+    td {padding:16px;border-bottom:1px solid #eee;vertical-align:top;}
+    .btn {padding:6px 12px;border-radius:6px;text-decoration:none;margin:0 4px;font-weight:600;}
     .edit {background:#f59e0b;color:#fff;}
-    .delete {background:var(--danger);color:#fff;}
-    .empty {text-align:center;padding:30px;color:#9ca3af;font-style:italic;}
+    .delete {background:#ef4444;color:#fff;}
+    .add-btn {background:#07c539;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;}
   </style>
 </head>
 <body>
-
-<header>
-  <h1 onclick="showToast('Kembali ke Admin', 'info')">Transaksi Panen & Pembelian</h1>
-  <nav>
-    <a href="../admin.php">Kembali ke Admin</a>
-  </nav>
-</header>
-
-<main>
-  <div class="form-container" id="editForm" style="display:none;">
-    <h3>Edit Transaksi</h3>
-    <div id="editFormContent"></div>
+<div class="header">
+  <h2>Daftar Transaksi</h2>
+  <div>
+    <a href="transaction-entry.php" class="add-btn">+ Tambah Transaksi</a>
+    <a href="../admin.php" style="color:#fff;margin-left:15px;">Kembali ke Admin</a>
   </div>
+</div>
 
-  <div class="form-container">
-    <h3>Tambah Transaksi Manual</h3>
-    <form id="addForm">
-      <div class="form-group"><label>Barang</label><input type="text" id="addCat" required /></div>
-      <div class="form-group"><label>Jumlah (kg)</label><input type="number" id="addAmount" required /></div>
-      <div class="form-group"><label>Total (Rp)</label><input type="number" id="addTotal" /></div>
-      <div class="form-group"><label>Pembeli</label><input type="text" id="addPembeli" /></div>
-      <div class="form-group"><label>No. HP</label><input type="tel" id="addNoHP" /></div>
-      <div class="form-group"><label>Alamat</label><textarea id="addAlamat"></textarea></div>
-      <div class="form-group"><label>Tanggal</label><input type="date" id="addDate" required /></div>
-      <button type="submit" class="btn btn-primary">Simpan</button>
-    </form>
-  </div>
-
+<div class="container">
   <table>
-    <thead>
-      <tr>
-        <th>No</th><th>Barang</th><th>Jumlah</th><th>Total</th><th>Pembeli</th><th>No. HP</th><th>Alamat</th><th>Tanggal</th><th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody id="transBody"></tbody>
-  </table>
-</main>
-
-<script>
-let editIndex = null;
-
-// === TOAST (JS MURNI) ===
-function showToast(msg, type = 'info', duration = 3000) {
-  const container = document.createElement('div');
-  container.style.position = 'fixed';
-  container.style.bottom = '20px';
-  container.style.right = '20px';
-  container.style.zIndex = '9999';
-  document.body.appendChild(container);
-
-  const toast = document.createElement('div');
-  toast.style.background = type === 'success' ? '#16a34a' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6';
-  toast.style.color = '#fff';
-  toast.style.padding = '14px 20px';
-  toast.style.borderRadius = '12px';
-  toast.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)';
-  toast.style.display = 'flex';
-  toast.style.alignItems = 'center';
-  toast.style.gap = '12px';
-  toast.style.fontSize = '0.95rem';
-  toast.style.minWidth = '300px';
-  toast.style.transform = 'translateX(120%)';
-  toast.style.transition = 'transform 0.3s ease';
-  toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i><span>${msg}</span>`;
-  container.appendChild(toast);
-  setTimeout(() => toast.style.transform = 'translateX(0)', 100);
-  setTimeout(() => {
-    toast.style.transform = 'translateX(120%)';
-    setTimeout(() => { toast.remove(); if (!container.hasChildNodes()) container.remove(); }, 300);
-  }, duration);
-}
-
-function loadTransactions() {
-  const trxs = JSON.parse(localStorage.getItem('transactions') || '[]');
-  const tbody = document.getElementById('transBody');
-  tbody.innerHTML = trxs.length ? trxs.map((t, i) => `
     <tr>
-      <td>${i+1}</td>
-      <td>${t.category}</td>
-      <td>${t.amount}</td>
-      <td>Rp. ${t.total?.toLocaleString('id-ID') || '-'}</td>
-      <td>${t.pembeli || '-'}</td>
-      <td>${t.no_hp || '-'}</td>
-      <td>${t.alamat || '-'}</td>
-      <td>${new Date(t.date).toLocaleDateString('id-ID')}</td>
-      <td>
-        <button class="action-btn edit" onclick="startEdit(${i})">Edit</button>
-        <button class="action-btn delete" onclick="del(${i})">Hapus</button>
-      </td>
+      <th>No</th><th>Tanggal</th><th>Pembeli</th><th>No HP</th><th>Kategori</th><th>Jumlah (Kg)</th><th>Total Harga</th><th>Alamat</th><th>Aksi</th>
     </tr>
-  `).join('') : `<tr><td colspan="9" class="empty">Belum ada transaksi</td></tr>`;
-}
-
-function startEdit(i) {
-  const trxs = JSON.parse(localStorage.getItem('transactions') || '[]');
-  const t = trxs[i];
-  document.getElementById('editFormContent').innerHTML = `
-    <div class="form-group"><label>Barang</label><input type="text" id="editCat" value="${t.category}" /></div>
-    <div class="form-group"><label>Jumlah (kg)</label><input type="number" id="editAmount" value="${t.amount}" /></div>
-    <div class="form-group"><label>Total (Rp)</label><input type="number" id="editTotal" value="${t.total || ''}" /></div>
-    <div class="form-group"><label>Pembeli</label><input type="text" id="editPembeli" value="${t.pembeli || ''}" /></div>
-    <div class="form-group"><label>No. HP</label><input type="tel" id="editNoHP" value="${t.no_hp || ''}" /></div>
-    <div class="form-group"><label>Alamat</label><textarea id="editAlamat">${t.alamat || ''}</textarea></div>
-    <div class="form-group"><label>Tanggal</label><input type="date" id="editDate" value="${t.date}" /></div>
-    <button type="button" class="btn btn-primary" onclick="saveEdit()">Simpan</button>
-    <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Batal</button>
-  `;
-  editIndex = i;
-  document.getElementById('editForm').style.display = 'block';
-}
-
-function saveEdit() {
-  const cat = document.getElementById('editCat').value.trim();
-  const amount = document.getElementById('editAmount').value;
-  const total = document.getElementById('editTotal').value || 0;
-  const pembeli = document.getElementById('editPembeli').value.trim();
-  const noHP = document.getElementById('editNoHP').value.trim();
-  const alamat = document.getElementById('editAlamat').value.trim();
-  const date = document.getElementById('editDate').value;
-
-  if (!cat || !amount || !date) return showToast('Field wajib diisi!', 'error');
-
-  const trxs = JSON.parse(localStorage.getItem('transactions') || '[]');
-  trxs[editIndex] = { category: cat, amount: parseInt(amount), total: parseInt(total), pembeli, no_hp: noHP, alamat, date };
-  localStorage.setItem('transactions', JSON.stringify(trxs));
-  cancelEdit();
-  loadTransactions();
-  showToast('Transaksi diperbarui!', 'success');
-}
-
-function cancelEdit() {
-  editIndex = null;
-  document.getElementById('editForm').style.display = 'none';
-}
-
-function del(i) {
-  if (!confirm('Hapus transaksi ini?')) return;
-  const trxs = JSON.parse(localStorage.getItem('transactions') || '[]');
-  trxs.splice(i, 1);
-  localStorage.setItem('transactions', JSON.stringify(trxs));
-  loadTransactions();
-  showToast('Transaksi dihapus!', 'success');
-}
-
-document.getElementById('addForm').onsubmit = function(e) {
-  e.preventDefault();
-  const cat = document.getElementById('addCat').value.trim();
-  const amount = document.getElementById('addAmount').value;
-  const total = document.getElementById('addTotal').value || 0;
-  const pembeli = document.getElementById('addPembeli').value.trim();
-  const noHP = document.getElementById('addNoHP').value.trim();
-  const alamat = document.getElementById('addAlamat').value.trim();
-  const date = document.getElementById('addDate').value;
-
-  if (!cat || !amount || !date) return showToast('Field wajib diisi!', 'error');
-
-  const trxs = JSON.parse(localStorage.getItem('transactions') || '[]184');
-  trxs.push({ category: cat, amount: parseInt(amount), total: parseInt(total), pembeli, no_hp: noHP, alamat, date });
-  localStorage.setItem('transactions', JSON.stringify(trxs));
-  this.reset();
-  document.getElementById('addDate').value = new Date().toISOString().split('T')[0];
-  loadTransactions();
-  showToast('Transaksi ditambahkan!', 'success');
-};
-
-window.onload = function() {
-  document.getElementById('addDate').value = new Date().toISOString().split('T')[0];
-  loadTransactions();
-};
-</script>
-
+    <?php
+    $no = 1;
+    $stmt = $pdo->query("SELECT t.*, c.nama_categories FROM tb_transaction t 
+                         LEFT JOIN tb_categories c ON t.id_kategori = c.id_categories 
+                         ORDER BY t.tanggal DESC, t.created_at DESC");
+    while ($row = $stmt->fetch()) {
+        echo "<tr>
+          <td>$no</td>
+          <td>" . date('d-m-Y', strtotime($row['tanggal'])) . "</td>
+          <td><strong>{$row['pembeli']}</strong></td>
+          <td>{$row['no_hp_pembeli']}</td>
+          <td>{$row['nama_categories']}</td>
+          <td>" . number_format($row['jumlah_kg']) . " Kg</td>
+          <td>Rp " . number_format($row['total_harga']) . "</td>
+          <td>" . nl2br(htmlspecialchars($row['alamat'])) . "</td>
+          <td>
+            <a href='transaction-edit.php?id={$row['id_transaksi']}' class='btn edit'>Edit</a>
+            <a href='transaction-proses.php?hapus={$row['id_transaksi']}' class='btn delete'
+               onclick=\"return confirm('Yakin hapus transaksi ini?')\">Hapus</a>
+          </td>
+        </tr>";
+        $no++;
+    }
+    if ($no == 1) echo "<tr><td colspan='9' style='text-align:center;padding:60px;'>Belum ada transaksi.</td></tr>";
+    ?>
+  </table>
+</div>
 </body>
 </html>

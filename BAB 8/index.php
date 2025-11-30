@@ -1,0 +1,242 @@
+<?php require 'koneksi.php'; ?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pertanian Modern</title>
+  <link rel="icon" href="assets/icon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="index-page">
+<div class="container">
+  <header>
+    <nav>
+      <div class="logo" id="devTrigger"><img src="assets/logo.png" alt="Logo" /></div>
+      <input type="checkbox" id="click" />
+      <label for="click" class="menu-btn"><i class="fas fa-bars"></i></label>
+      <ul>
+        <li><a href="index.php" class="active">Home</a></li>
+        <li><a href="#" onclick="scrollToCategories(event)">Categories</a></li>
+        <li><a href="login.php">LOGIN</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="jumbotron" id="jumbotronScroll">
+      <div class="jumbotron-text">
+        <h1 id="typingText"></h1>
+        <p>Teknologi terbaru yang membantu petani memantau tanaman dan transaksi dengan mudah</p>
+        <a href="login.php"><button class="btn_getStarted">Mulai Sekarang</button></a>
+      </div>
+      <div class="jumbotron-img">
+        <img src="assets/testi1.jpg" alt="Petani" />
+      </div>
+    </div>
+
+    <div class="cards-categories" id="categoriesSection">
+      <h2 id="catTitle">Kategori Tanaman</h2>
+      <div class="card-categories" id="cardContainer">
+        <?php
+        $stmt = $pdo->query("SELECT * FROM tb_categories ORDER BY id_categories DESC");
+        if ($stmt->rowCount() == 0) {
+            echo "<p style='text-align:center;color:#999;padding:50px 0;grid-column:1/-1;'>Belum ada kategori dari admin</p>";
+        }
+        while ($row = $stmt->fetch()) {
+            $foto = $row['photo'] ? "img_categories/{$row['photo']}" : "assets/no-image.jpg";
+            echo "
+            <div class='card'>
+              <div class='card-image'><img src='$foto' alt='{$row['nama_categories']}' /></div>
+              <div class='card-content'>
+                <h5>{$row['nama_categories']}</h5>
+                <p class='description'>" . nl2br(htmlspecialchars($row['description'])) . "</p>
+                <p class='price'><span>Rp.</span>" . number_format($row['price']) . "/kg</p>
+                <button class='btn_belanja' onclick=\"openPaymentForm('{$row['nama_categories']}', {$row['price']})\">Beli</button>
+              </div>
+            </div>";
+        }
+        ?>
+      </div>
+    </div>
+  </main>
+  <footer><h4>© Lab Pemrograman Komputer 2025</h4></footer>
+</div>
+
+<!-- TOAST & MODAL 100% SAMA PERSIS -->
+<div id="toastContainer"></div>
+<div id="paymentFormPopup" class="modal">
+  <div class="modal-content" style="max-width: 420px; border-radius: 16px;">
+    <div class="modal-header" style="padding: 20px 25px 15px; border-bottom: 1px solid #eee;">
+      <h3 style="margin: 0; color: #ffb72b; font-size: 1.4rem; font-weight: 600;">Formulir Pembayaran</h3>
+      <span class="close" onclick="closePaymentForm()">×</span>
+    </div>
+    <div class="payment-form" style="padding: 25px;">
+      <label>Nama Barang</label><input type="text" id="formNama" readonly />
+      <label>Harga</label><input type="text" id="formHarga" readonly />
+      <label>Jumlah (kg)</label><input type="number" id="formJumlah" min="1" value="1" />
+      <label>Nama :</label><input type="text" id="formNamaPembeli" placeholder="Masukkan nama Anda" required />
+      <label>No. HP :</label><input type="tel" id="formNoHP" placeholder="Contoh: 08123456789" required />
+      <label>Alamat:</label><textarea id="formAlamat" placeholder="Masukkan alamat lengkap" required></textarea>
+      <div class="modal-buttons">
+        <button class="btn-keluar" onclick="closePaymentForm()">Keluar</button>
+        <button class="btn-lanjutkan" onclick="showConfirmation()">Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="confirmPopup" class="modal">
+  <div class="modal-content" style="max-width: 400px; border-radius: 16px; text-align: center;">
+    <div class="modal-header" style="padding: 20px; background: #ffb72b; color: white;">
+      <h3 style="margin: 0;">Konfirmasi Pesanan</h3>
+    </div>
+    <div style="padding: 25px;">
+      <p id="confirmText" style="margin: 15px 0; font-size: 1rem; line-height: 1.6;"></p>
+      <div class="modal-buttons">
+        <button class="btn-keluar" onclick="closeConfirm()">Batal</button>
+        <button class="btn-lanjutkan" onclick="submitOrder()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// SEMUA EFEK KEREN 100% KEMBALI PERSIS SEPERTI DULU!
+function showToast(msg, type = 'info', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':type==='warning'?'exclamation-triangle':'info-circle'}"></i><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 100);
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, duration);
+}
+
+function openPaymentForm(name, price) {
+  document.getElementById('formNama').value = name;
+  document.getElementById('formHarga').value = `Rp. ${price.toLocaleString('id-ID')}/kg`;
+  document.getElementById('formJumlah').value = 1;
+  document.getElementById('formNamaPembeli').value = '';
+  document.getElementById('formNoHP').value = '';
+  document.getElementById('formAlamat').value = '';
+  document.getElementById('paymentFormPopup').style.display = 'flex';
+}
+
+function closePaymentForm() { document.getElementById('paymentFormPopup').style.display = 'none'; }
+
+function showConfirmation() {
+    const nama    = document.getElementById('formNama').value;
+    const harga   = document.getElementById('formHarga').value;
+    const jumlah  = parseInt(document.getElementById('formJumlah').value) || 1;
+    const pembeli = document.getElementById('formNamaPembeli').value.trim();
+    const noHP     = document.getElementById('formNoHP').value.trim();
+    const alamat  = document.getElementById('formAlamat').value.trim();
+
+    if (!pembeli || !noHP || !alamat) {
+        showToast('Lengkapi semua data!', 'error');
+        return;
+    }
+
+    const hargaAngka = parseInt(harga.replace(/[^0-9]/g, ''));
+    const total = hargaAngka * jumlah;
+
+    document.getElementById('confirmText').innerHTML = `
+        <strong>${nama}</strong><br>
+        ${jumlah} kg × Rp. ${hargaAngka.toLocaleString('id-ID')}/kg = <strong>Rp ${total.toLocaleString('id-ID')}</strong><br><br>
+        <strong>Pembeli:</strong> ${pembeli}<br>
+        <strong>No. HP:</strong> ${noHP}<br>
+        <strong>Alamat:</strong> ${alamat}
+    `;
+
+    closePaymentForm();
+    document.getElementById('confirmPopup').style.display = 'flex';
+}
+
+function closeConfirm() {
+    document.getElementById('confirmPopup').style.display = 'none';
+}
+
+function submitOrder() {
+    const nama    = document.getElementById('formNama').value;
+    const jumlah  = parseInt(document.getElementById('formJumlah').value);
+    const pembeli = document.getElementById('formNamaPembeli').value.trim();
+    const noHP    = document.getElementById('formNoHP').value.trim();
+    const alamat  = document.getElementById('formAlamat').value.trim();
+
+    const formData = new URLSearchParams();
+    formData.append('nama', nama);
+    formData.append('jumlah', jumlah);
+    formData.append('pembeli', pembeli);
+    formData.append('nohp', noHP);
+    formData.append('alamat', alamat);
+
+    fetch('transaction/simpan-pesanan.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.text())
+    .then(text => {
+        if (text.trim() === 'success') {
+            showToast('Pesanan berhasil disimpan!', 'success');
+            closeConfirm();
+        } else {
+            showToast('Gagal simpan: ' + text, 'error');
+        }
+    })
+    .catch(() => showToast('Koneksi error', 'error'));
+}
+// SEMUA EFEK KEREN KEMBALI!
+document.getElementById('devTrigger').addEventListener('dblclick', () => showToast('Mode Developer Aktif!', 'warning'));
+let scrolled = false;
+window.addEventListener('wheel', () => { if (!scrolled) { showToast('Anda sedang menjelajah!', 'info'); scrolled = true; }});
+document.getElementById('cardContainer').addEventListener('contextmenu', (e) => { e.preventDefault(); showToast('Dibuat oleh: Rivaldo Candra Putra - 2025', 'info'); });
+
+function scrollToCategories(e) {
+  e.preventDefault();
+  document.getElementById('categoriesSection').scrollIntoView({ behavior: 'smooth' });
+  document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
+  e.target.classList.add('active');
+}
+
+const text = "Temukan Solusi Pertanian Modern, Tingkatkan Hasil Panen";
+let i = 0;
+function typeWriter() {
+  if (i < text.length) {
+    document.getElementById('typingText').textContent += text.charAt(i);
+    i++;
+    setTimeout(typeWriter, 50);
+  }
+}
+
+window.onload = function() {
+  typeWriter();
+  showToast('Selamat datang di Pertanian Modern!', 'info');
+};
+</script>
+
+<!-- STYLE TOAST & MODAL 100% SAMA PERSIS -->
+<style>
+#toastContainer { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: #333; color: #fff; padding: 14px 20px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; font-size: 0.95rem; min-width: 300px; transform: translateX(120%); transition: transform 0.3s ease; }
+.toast.show { transform: translateX(0); }
+.toast i { font-size: 1.3rem; }
+.toast-success { background: #16a34a; }
+.toast-error { background: #ef4444; }
+.toast-warning { background: #f59e0b; }
+.toast-info { background: #3b82f6; }
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 20px; }
+.modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+.close { font-size: 28px; color: #aaa; cursor: pointer; float: right; }
+.close:hover { color: #000; }
+.modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.btn-keluar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
+.btn-lanjutkan { background: #ffb72b; color: white; padding: 10px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; }
+input, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; font-size: 1rem; }
+input[readonly] { background: #f9f9f9; color: #555; }
+textarea { min-height: 80px; resize: vertical; }
+</style>
+</body>
+</html>
