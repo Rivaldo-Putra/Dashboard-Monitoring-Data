@@ -29,6 +29,18 @@ $admin_name = $_SESSION['admin_nama'] ?? 'Admin';
 </head>
 <body>
 <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:20px 0; flex-wrap:wrap; gap:15px;">
+    <!-- Tombol Tambah Transaksi -->
+    <a href="tambah-transaksi.php" class="add-btn" style="font-size:1rem; font-weight:bold; color:#9b59b6;">
+        + Tambah Transaksi
+    </a>
+
+    <!-- Tombol Kembali ke Admin -->
+    <a href="../admin.php" style="display:inline-block; padding:12px 24px; background:#07c539; color:white; text-decoration:none; border-radius:10px; font-weight:bold; box-shadow:0 5px 15px rgba(7,197,57,0.4); transition:0.3s;">
+        Kembali ke Dashboard Admin
+    </a>
+</div>
+</div>
     <h2>DAFTAR TRANSAKSI PENJUALAN</h2>
     <p style="text-align:center;">Selamat datang, <strong><?=htmlspecialchars($admin_name)?></strong></p>
 

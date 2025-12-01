@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 require '../koneksi.php';
 
 if (!isset($_SESSION['admin_id'])) {
